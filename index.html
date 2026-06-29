@@ -423,6 +423,8 @@
             <option>IT & mjukvaruutveckling</option>
             <option>Detaljhandel & e-handel</option>
             <option>Hälsa & vård</option>
+            <option>B2B & B2P</option>
+            <option>Låstekniker & Larm</option>
             <option>Finans & bank</option>
             <option>Bygg & fastighet</option>
             <option>Marknadsföring & media</option>
@@ -617,7 +619,7 @@ Vad brukar gå fel när företag försöker lösa detta – och hur undviker man
 Var specifik, handlingsorienterad och rak. Undvik floskler.`;
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
