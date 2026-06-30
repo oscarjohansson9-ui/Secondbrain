@@ -1,12 +1,5 @@
-/*
-  OnBrain — auth-guard.js
-  Inkluderas på ALLA appsidor (index.html, service.html, mail.html, offert.html).
-  Kollar att användaren är inloggad. Om inte → skickar till login.html.
-  Lägger även till en liten "inloggad som..." + logga ut-knapp i hörnet.
-*/
-
-const SUPABASE_URL = "DIN_SUPABASE_URL_HÄR";
-const SUPABASE_ANON_KEY = "DIN_PUBLISHABLE_KEY_HÄR";
+const SUPABASE_URL = "sb_publishable_0BxO282ZNBxUD1bf-UTaUg_jRqKAswX";
+const SUPABASE_ANON_KEY = "sb_secret_C2FOdp0JPxaslLiIEMTx6Q_1QNS80pD";
 
 const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
