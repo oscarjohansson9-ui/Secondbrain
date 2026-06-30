@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SecondBrain — Servicehantering</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0A0A0F;
+    --surface: #12121A;
+    --surface2: #1A1A26;
+    --border: #252535;
+    --accent: #6C47FF;
+    --accent-soft: #8B6BFF;
+    --accent-glow: rgba(108,71,255,0.18);
+    --text: #F0EFF8;
+    --muted: #7A798A;
+    --success: #3ECBA5;
+    --warning: #FFB347;
+    --danger: #FF6B6B;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+
+  /* NAV */
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    height: 56px;
+  }
+  .logo { font-family: var(--mono); font-weight: 600; font-size: 0.95rem; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--text); background: var(--surface2); }
+
+  /* LAYOUT */
+  .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+  /* HEADER */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .page-header h1 { font-size: 1.4rem; font-weight: 600; }
+  .page-header p { color: var(--muted); font-size: 0.88rem; margin-top: 4px; }
+
+  /* STATS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 700px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .stat-label { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .stat-value { font-size: 1.8rem; font-weight: 600; }
+  .stat-value.green { color: var(--success); }
+  .stat-value.yellow { color: var(--warning); }
+  .stat-value.red { color: var(--danger); }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .card-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-header h2 { font-size: 0.95rem; font-weight: 600; }
+  .card-body { padding: 24px; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-group { margin-bottom: 16px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  input, select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  select { cursor: pointer; appearance: none; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: var(--sans);
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(108,71,255,0.3);
+  }
+  .btn-primary:hover { background: var(--accent-soft); transform: translateY(-1px); }
+  .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+  .btn-success { background: rgba(62,203,165,0.15); color: var(--success); border: 1px solid rgba(62,203,165,0.3); }
+  .btn-success:hover { background: rgba(62,203,165,0.25); }
+  .btn-warning { background: rgba(255,179,71,0.15); color: var(--warning); border: 1px solid rgba(255,179,71,0.3); }
+  .btn-danger { background: rgba(255,107,107,0.15); color: var(--danger); border: 1px solid rgba(255,107,107,0.3); }
+  .btn-danger:hover { background: rgba(255,107,107,0.25); }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 14px 16px; border-bottom: 1px solid rgba(37,37,53,0.5); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+  }
+  .badge-green { background: rgba(62,203,165,0.12); color: var(--success); border: 1px solid rgba(62,203,165,0.25); }
+  .badge-yellow { background: rgba(255,179,71,0.12); color: var(--warning); border: 1px solid rgba(255,179,71,0.25); }
+  .badge-red { background: rgba(255,107,107,0.12); color: var(--danger); border: 1px solid rgba(255,107,107,0.25); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 0.88rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 100;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: rgba(62,203,165,0.4); color: var(--success); }
+  .toast.error { border-color: rgba(255,107,107,0.4); color: var(--danger); }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 48px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 560px;
+    padding: 28px;
+  }
+  .modal h3 { font-size: 1.1rem; margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">second<span>brain</span>.ai</div>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">🧠 AI-analys</a>
+    <a href="service.html" class="nav-link active">🔧 Servicehantering</a>
+    <a href="mail.html" class="nav-link">✉️ AI-mail</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>🔧 Servicehantering</h1>
+      <p>Registrera installationer och håll koll på kommande servicar</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal()">+ Ny installation</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Totalt objekt</div>
+      <div class="stat-value" id="stat-total">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">OK</div>
+      <div class="stat-value green" id="stat-ok">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Service inom 3 mån</div>
+      <div class="stat-value yellow" id="stat-soon">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Förfallna</div>
+      <div class="stat-value red" id="stat-overdue">0</div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Installationer</h2>
+      <input type="text" id="search" placeholder="Sök kund eller objekt..." style="width:220px; padding:8px 12px; font-size:0.82rem;" oninput="renderTable()" />
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kund</th>
+              <th>Typ</th>
+              <th>Installerad</th>
+              <th>Nästa service</th>
+              <th>Status</th>
+              <th>Åtgärder</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+        <div id="empty-state" class="empty" style="display:none">
+          <div class="empty-icon">🔧</div>
+          Inga installationer än. Klicka "+ Ny installation" för att börja.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NY INSTALLATION -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Registrera ny installation</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Kundnamn</label>
+        <input type="text" id="f-customer" placeholder="T.ex. Låssnabben AB" />
+      </div>
+      <div class="form-group">
+        <label>Kontaktmail</label>
+        <input type="email" id="f-email" placeholder="kontakt@foretag.se" />
+      </div>
+      <div class="form-group">
+        <label>Typ av installation</label>
+        <select id="f-type">
+          <option value="">Välj typ...</option>
+          <option>Installation</option>
+          <option>Reparation</option>
+          <option>Underhållsservice</option>
+          <option>Besiktning / kontroll</option>
+          <option>Larm & säkerhet</option>
+          <option>El-arbete</option>
+          <option>VVS-arbete</option>
+          <option>Lås & dörr</option>
+          <option>Ventilation</option>
+          <option>Annat</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Serviceintervall</label>
+        <select id="f-interval">
+          <option value="6">Var 6:e månad</option>
+          <option value="12" selected>Var 12:e månad</option>
+          <option value="24">Vart 2:a år</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Installationsdatum</label>
+        <input type="date" id="f-date" />
+      </div>
+      <div class="form-group">
+        <label>Adress / Plats</label>
+        <input type="text" id="f-address" placeholder="T.ex. Storgatan 1, Stockholm" />
+      </div>
+      <div class="form-group full">
+        <label>Anteckningar</label>
+        <textarea id="f-notes" placeholder="T.ex. serienummer, modell, special..." style="min-height:80px"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" style="background:var(--surface2); color:var(--muted)" onclick="closeModal()">Avbryt</button>
+      <button class="btn btn-primary" onclick="saveInstallation()">Spara installation</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let installations = JSON.parse(localStorage.getItem('sb_installations') || '[]');
+
+// Set today as default date
+document.getElementById('f-date').valueAsDate = new Date();
+
+function save() {
+  localStorage.setItem('sb_installations', JSON.stringify(installations));
+  renderTable();
+  updateStats();
+}
+
+function openModal() {
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  // Reset form
+  ['f-customer','f-email','f-type','f-address','f-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-interval').value = '12';
+  document.getElementById('f-date').valueAsDate = new Date();
+}
+
+function saveInstallation() {
+  const customer = document.getElementById('f-customer').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const type = document.getElementById('f-type').value;
+  const interval = parseInt(document.getElementById('f-interval').value);
+  const date = document.getElementById('f-date').value;
+  const address = document.getElementById('f-address').value.trim();
+  const notes = document.getElementById('f-notes').value.trim();
+
+  if (!customer || !type || !date) {
+    showToast('Fyll i kund, typ och datum!', 'error');
+    return;
+  }
+
+  const installDate = new Date(date);
+  const nextService = new Date(installDate);
+  nextService.setMonth(nextService.getMonth() + interval);
+
+  installations.unshift({
+    id: Date.now(),
+    customer, email, type, interval, address, notes,
+    installDate: date,
+    nextService: nextService.toISOString().split('T')[0],
+    lastService: date,
+    status: 'ok',
+    reminderSent: false
+  });
+
+  save();
+  closeModal();
+  showToast('✅ Installation sparad!', 'success');
+}
+
+function getStatus(nextService) {
+  const today = new Date();
+  const next = new Date(nextService);
+  const diffDays = Math.ceil((next - today) / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return 'overdue';
+  if (diffDays <= 90) return 'soon';
+  return 'ok';
+}
+
+function statusBadge(nextService) {
+  const s = getStatus(nextService);
+  const today = new Date();
+  const next = new Date(nextService);
+  const diffDays = Math.ceil((next - today) / (1000 * 60 * 60 * 24));
+
+  if (s === 'overdue') return `<span class="badge badge-red">● Förfallen ${Math.abs(diffDays)} dagar</span>`;
+  if (s === 'soon') return `<span class="badge badge-yellow">● Service om ${diffDays} dagar</span>`;
+  return `<span class="badge badge-green">● OK</span>`;
+}
+
+function markDone(id) {
+  const inst = installations.find(i => i.id === id);
+  if (!inst) return;
+  const today = new Date();
+  const next = new Date(today);
+  next.setMonth(next.getMonth() + inst.interval);
+  inst.lastService = today.toISOString().split('T')[0];
+  inst.nextService = next.toISOString().split('T')[0];
+  inst.reminderSent = false;
+  save();
+  showToast('✅ Service markerad som utförd!', 'success');
+}
+
+async function sendReminder(id) {
+  const inst = installations.find(i => i.id === id);
+  if (!inst) return;
+  if (!inst.email) { showToast('Ingen mailadress registrerad!', 'error'); return; }
+
+  showToast('Skickar påminnelse...', '');
+
+  try {
+    const res = await fetch('/api/remind', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: inst.email,
+        customer: inst.customer,
+        type: inst.type,
+        nextService: inst.nextService,
+        address: inst.address
+      })
+    });
+
+    if (res.ok) {
+      inst.reminderSent = true;
+      save();
+      showToast('✅ Påminnelse skickad till ' + inst.email, 'success');
+    } else {
+      showToast('Kunde inte skicka mail', 'error');
+    }
+  } catch(e) {
+    showToast('Fel: ' + e.message, 'error');
+  }
+}
+
+function deleteInstallation(id) {
+  if (!confirm('Ta bort denna installation?')) return;
+  installations = installations.filter(i => i.id !== id);
+  save();
+  showToast('Installation borttagen', '');
+}
+
+function renderTable() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const filtered = installations.filter(i =>
+    i.customer.toLowerCase().includes(search) ||
+    i.type.toLowerCase().includes(search) ||
+    (i.address || '').toLowerCase().includes(search)
+  );
+
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+  tbody.innerHTML = filtered.map(inst => `
+    <tr>
+      <td>
+        <div style="font-weight:600">${inst.customer}</div>
+        <div style="font-size:0.78rem; color:var(--muted)">${inst.address || ''}</div>
+      </td>
+      <td>${inst.type}</td>
+      <td style="font-family:var(--mono); font-size:0.82rem">${inst.installDate}</td>
+      <td style="font-family:var(--mono); font-size:0.82rem">${inst.nextService}</td>
+      <td>${statusBadge(inst.nextService)}</td>
+      <td>
+        <div style="display:flex; gap:6px; flex-wrap:wrap">
+          <button class="btn btn-sm btn-success" onclick="markDone(${inst.id})">✓ Utförd</button>
+          <button class="btn btn-sm btn-warning" onclick="sendReminder(${inst.id})" ${inst.reminderSent ? 'style="opacity:0.5"' : ''}>
+            ${inst.reminderSent ? '✉ Skickat' : '✉ Påminn'}
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="deleteInstallation(${inst.id})">✕</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function updateStats() {
+  const total = installations.length;
+  const ok = installations.filter(i => getStatus(i.nextService) === 'ok').length;
+  const soon = installations.filter(i => getStatus(i.nextService) === 'soon').length;
+  const overdue = installations.filter(i => getStatus(i.nextService) === 'overdue').length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-ok').textContent = ok;
+  document.getElementById('stat-soon').textContent = soon;
+  document.getElementById('stat-overdue').textContent = overdue;
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+renderTable();
+updateStats();
+</script>
+</body>
+</html>

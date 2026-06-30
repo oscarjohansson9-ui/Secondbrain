@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SecondBrain — AI Offertgenerator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+  :root {
+    --bg: #0A0A0F; --surface: #12121A; --surface2: #1A1A26;
+    --border: #252535; --accent: #6C47FF; --accent-soft: #8B6BFF;
+    --accent-glow: rgba(108,71,255,0.18); --text: #F0EFF8;
+    --muted: #7A798A; --success: #3ECBA5; --warning: #FFB347;
+    --mono: 'JetBrains Mono', monospace; --sans: 'Inter', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+  nav {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 32px; display: flex; align-items: center; gap: 32px; height: 56px;
+    flex-wrap: wrap;
+  }
+  .logo { font-family: var(--mono); font-weight: 600; font-size: 0.95rem; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link { padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; color: var(--muted); text-decoration: none; transition: all 0.2s; }
+  .nav-link:hover, .nav-link.active { color: var(--text); background: var(--surface2); }
+  .page { max-width: 1000px; margin: 0 auto; padding: 32px 24px; }
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-size: 1.4rem; font-weight: 600; }
+  .page-header p { color: var(--muted); font-size: 0.88rem; margin-top: 4px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .card-header h2 { font-size: 0.9rem; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  /* PRISLISTA UPLOAD */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accent-glow); }
+  .upload-zone input { display: none; }
+  .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+  .upload-text { color: var(--muted); font-size: 0.85rem; }
+  .upload-text strong { color: var(--accent-soft); }
+
+  .pricelist-status {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(62,203,165,0.08); border: 1px solid rgba(62,203,165,0.25);
+    border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; margin-top: 12px;
+    display: none;
+  }
+  .pricelist-status.show { display: flex; }
+
+  /* TEXTAREA FOR MANUAL PASTE */
+  textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: var(--mono);
+    font-size: 0.82rem; padding: 14px; outline: none; resize: vertical;
+    min-height: 120px; line-height: 1.6;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  label { display: block; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+
+  /* IMAGE UPLOAD FOR OFFER */
+  .image-preview {
+    max-width: 100%; max-height: 280px; border-radius: 12px;
+    border: 1px solid var(--border); margin-top: 12px; display: none;
+  }
+  .image-preview.show { display: block; }
+
+  .form-group { margin-bottom: 16px; }
+  input[type="text"] {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: var(--sans);
+    font-size: 0.88rem; padding: 12px 14px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+  .btn-primary {
+    width: 100%; background: var(--accent); color: #fff; border: none;
+    border-radius: 10px; padding: 14px; font-size: 0.92rem; font-weight: 600;
+    font-family: var(--sans); cursor: pointer; margin-top: 8px;
+    transition: all 0.2s; box-shadow: 0 4px 16px rgba(108,71,255,0.3);
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-soft); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary {
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 16px; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); }
+
+  .badge-small {
+    font-family: var(--mono); font-size: 0.68rem; color: var(--success);
+    background: rgba(62,203,165,0.1); border: 1px solid rgba(62,203,165,0.25);
+    padding: 3px 10px; border-radius: 20px;
+  }
+
+  /* RESULT */
+  #offer-result {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; font-size: 0.92rem;
+    line-height: 1.75; white-space: pre-wrap; min-height: 100px;
+  }
+  .thinking { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; padding: 24px; text-align: center; }
+  .copy-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    font-family: var(--mono); font-size: 0.72rem; padding: 5px 12px;
+    border-radius: 6px; cursor: pointer; margin-top: 12px; transition: all 0.2s;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+  .section-header {
+    font-family: var(--mono); font-size: 0.75rem; color: var(--accent-soft);
+    text-transform: uppercase; letter-spacing: 0.08em; margin: 18px 0 6px;
+  }
+  .section-header:first-child { margin-top: 0; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">second<span>brain</span>.ai</div>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">🧠 AI-analys</a>
+    <a href="service.html" class="nav-link">🔧 Servicehantering</a>
+    <a href="mail.html" class="nav-link">✉️ AI-mail</a>
+    <a href="offert.html" class="nav-link active">📋 Offertgenerator</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>📋 AI Offertgenerator</h1>
+    <p>Ladda upp er prislista en gång — sen räcker en bild eller beskrivning för en färdig offert</p>
+  </div>
+
+  <!-- STEG 1: PRISLISTA -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Steg 1 — Er prislista</h2>
+      <span class="badge-small" id="pricelist-badge" style="display:none">✓ Inläst</span>
+    </div>
+    <div class="card-body">
+      <label>Ladda upp prislista (Excel, CSV eller PDF från grossist)</label>
+      <div class="upload-zone" id="pricelist-drop" onclick="document.getElementById('pricelist-input').click()">
+        <div class="upload-icon">📊</div>
+        <div class="upload-text"><strong>Klicka för att ladda upp</strong> eller dra en fil hit</div>
+        <div class="upload-text" style="margin-top:4px; font-size:0.75rem">Stödjer .xlsx, .xls, .csv, .pdf</div>
+        <input type="file" id="pricelist-input" accept=".xlsx,.xls,.csv,.pdf" onchange="handlePricelistFile(this.files[0])" />
+      </div>
+      <div id="pricelist-filename" style="margin-top:10px; font-size:0.82rem; color:var(--muted); display:none"></div>
+
+      <div style="margin:18px 0; display:flex; align-items:center; gap:12px;">
+        <div style="flex:1; height:1px; background:var(--border)"></div>
+        <span style="font-family:var(--mono); font-size:0.7rem; color:var(--muted)">ELLER KLISTRA IN MANUELLT</span>
+        <div style="flex:1; height:1px; background:var(--border)"></div>
+      </div>
+
+          <textarea id="pricelist" placeholder="T.ex:
+Värmepump Daikin 5kW - 18 900 kr/st
+Elcentral 12-grupp - 3 200 kr/st
+Rökdetektor - 280 kr/st
+Montagearbete - 650 kr/timme
+..."></textarea>
+      <button class="btn-secondary" style="margin-top:12px" onclick="savePricelist()">💾 Spara prislista</button>
+      <div class="pricelist-status" id="pricelist-status">
+        ✅ Prislista sparad — <span id="pricelist-count">0</span> rader inlästa
+      </div>
+    </div>
+  </div>
+
+  <!-- STEG 2: OFFERTUNDERLAG -->
+  <div class="card">
+    <div class="card-header"><h2>Steg 2 — Beskriv jobbet (eller ladda upp bild)</h2></div>
+    <div class="card-body">
+
+      <div class="form-group">
+        <label>Bild på objektet / platsen (valfritt)</label>
+        <div class="upload-zone" id="image-drop" onclick="document.getElementById('image-input').click()">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text"><strong>Klicka för att ladda upp</strong> eller dra en bild hit</div>
+          <input type="file" id="image-input" accept="image/*" onchange="handleImage(this.files[0])" />
+        </div>
+        <img id="image-preview" class="image-preview" />
+      </div>
+
+      <div class="form-group">
+        <label>Kundnamn</label>
+        <input type="text" id="offer-customer" placeholder="T.ex. Acme Fastigheter AB" />
+      </div>
+
+      <div class="form-group">
+        <label>Beskriv vad som ska göras</label>
+        <textarea id="offer-desc" placeholder="T.ex. Vill byta ut värmepumpen som syns på bilden mot en ny modell. Eller: Dra in en ny elgrupp till garaget och montera 3 uttag." style="min-height:100px"></textarea>
+      </div>
+
+      <button class="btn-primary" id="offer-btn" onclick="generateOffer()">⚡ Generera offert</button>
+    </div>
+  </div>
+
+  <!-- RESULTAT -->
+  <div class="card" id="result-card" style="display:none">
+    <div class="card-header">
+      <h2>Offertförslag</h2>
+      <button class="copy-btn" onclick="copyOffer()">Kopiera</button>
+    </div>
+    <div class="card-body">
+      <div id="offer-result"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Pricelist file handling
+const pricelistDrop = document.getElementById('pricelist-drop');
+pricelistDrop.addEventListener('dragover', e => { e.preventDefault(); pricelistDrop.classList.add('dragover'); });
+pricelistDrop.addEventListener('dragleave', () => pricelistDrop.classList.remove('dragover'));
+pricelistDrop.addEventListener('drop', e => {
+  e.preventDefault();
+  pricelistDrop.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handlePricelistFile(e.dataTransfer.files[0]);
+});
+
+async function handlePricelistFile(file) {
+  if (!file) return;
+  const nameEl = document.getElementById('pricelist-filename');
+  nameEl.textContent = '📄 ' + file.name + ' — bearbetar...';
+  nameEl.style.display = 'block';
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  try {
+    if (ext === 'csv') {
+      const text = await file.text();
+      document.getElementById('pricelist').value = text;
+      nameEl.textContent = '✅ ' + file.name + ' inläst';
+      savePricelist();
+    } else if (ext === 'xlsx' || ext === 'xls') {
+      await parseExcelFile(file);
+      nameEl.textContent = '✅ ' + file.name + ' inläst';
+      savePricelist();
+    } else if (ext === 'pdf') {
+      await parsePdfFile(file);
+      nameEl.textContent = '✅ ' + file.name + ' inläst (AI-tolkad)';
+    } else {
+      nameEl.textContent = '⚠️ Filtyp stöds ej';
+    }
+  } catch(e) {
+    nameEl.textContent = '⚠️ Kunde inte läsa filen: ' + e.message;
+  }
+}
+
+async function parseExcelFile(file) {
+  // Load SheetJS dynamically
+  if (!window.XLSX) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+  }
+  const buffer = await file.arrayBuffer();
+  const wb = XLSX.read(buffer, { type: 'array' });
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+  const text = rows
+    .filter(r => r.some(cell => String(cell).trim() !== ''))
+    .map(r => r.join(' - '))
+    .join('\n');
+  document.getElementById('pricelist').value = text;
+}
+
+async function parsePdfFile(file) {
+  // Send PDF to AI to extract a clean product/price list
+  const base64 = await fileToBase64(file);
+  const res = await fetch('/api/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+          { type: 'text', text: 'Extrahera alla produkter och priser från denna prislista/dokument. Svara ENDAST med en lista, en produkt per rad, format: "Produktnamn - pris kr/enhet". Inget annat, ingen inledning eller avslutning.' }
+        ]
+      }]
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'Kunde inte tolka PDF');
+  const text = data.content?.[0]?.text || '';
+  document.getElementById('pricelist').value = text;
+  savePricelist();
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+let uploadedImageBase64 = null;
+let uploadedImageMediaType = null;
+
+// Load saved pricelist
+const savedPricelist = localStorage.getItem('sb_pricelist');
+if (savedPricelist) {
+  document.getElementById('pricelist').value = savedPricelist;
+  showPricelistStatus(savedPricelist);
+}
+
+function savePricelist() {
+  const text = document.getElementById('pricelist').value.trim();
+  if (!text) { alert('Klistra in en prislista först!'); return; }
+  localStorage.setItem('sb_pricelist', text);
+  showPricelistStatus(text);
+}
+
+function showPricelistStatus(text) {
+  const lines = text.split('\n').filter(l => l.trim()).length;
+  document.getElementById('pricelist-count').textContent = lines;
+  document.getElementById('pricelist-status').classList.add('show');
+  document.getElementById('pricelist-badge').style.display = 'inline-block';
+}
+
+// Image handling
+const dropZone = document.getElementById('image-drop');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handleImage(e.dataTransfer.files[0]);
+});
+
+function handleImage(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  uploadedImageMediaType = file.type;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    uploadedImageBase64 = e.target.result.split(',')[1];
+    const preview = document.getElementById('image-preview');
+    preview.src = e.target.result;
+    preview.classList.add('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function generateOffer() {
+  const customer = document.getElementById('offer-customer').value.trim();
+  const desc = document.getElementById('offer-desc').value.trim();
+  const pricelist = document.getElementById('pricelist').value.trim() || localStorage.getItem('sb_pricelist') || '';
+
+  if (!desc && !uploadedImageBase64) {
+    alert('Beskriv jobbet eller ladda upp en bild!');
+    return;
+  }
+
+  const btn = document.getElementById('offer-btn');
+  btn.disabled = true;
+  btn.textContent = 'Genererar offert...';
+
+  const resultCard = document.getElementById('result-card');
+  const resultEl = document.getElementById('offer-result');
+  resultCard.style.display = 'block';
+  resultEl.innerHTML = '<div class="thinking">AI analyserar och skriver offert...</div>';
+
+  const promptText = `Du är en offertassistent för ett hantverksföretag (kan vara t.ex. el, VVS, lås, larm, bygg, ventilation eller liknande bransch).
+
+${pricelist ? `VÅR PRISLISTA:\n${pricelist}\n` : 'Ingen prislista angiven — uppskatta rimliga marknadspriser i Sverige.'}
+
+${customer ? `KUND: ${customer}` : ''}
+JOBBESKRIVNING: ${desc || 'Se bifogad bild för vad som ska installeras/åtgärdas.'}
+
+${uploadedImageBase64 ? 'En bild på objektet/platsen är bifogad — analysera vad som syns (typ av installation eller utrymme, befintlig utrustning, skick, synliga mått) och föreslå rätt produkter för jobbet.' : ''}
+
+Skriv en professionell offert på svenska med följande struktur:
+
+📋 OFFERT
+Kort sammanfattning av uppdraget (1-2 meningar)
+
+🔧 MATERIAL & PRODUKTER
+Lista produkter som behövs, matcha mot prislistan om möjligt. Format: Produkt — antal — á-pris — summa
+
+⏱️ ARBETSTID
+Uppskattad tid och kostnad för montage/installation
+
+💰 TOTALSUMMA
+Material + arbete, exklusive moms, samt totalt inklusive 25% moms
+
+📝 VILLKOR
+Kort standardtext om giltighetstid (30 dagar) och betalningsvillkor
+
+Var konkret med priser baserat på prislistan. Om en produkt inte finns i prislistan, markera det tydligt med "(uppskattat pris, ej i prislista)".`;
+
+  const content = [];
+  if (uploadedImageBase64) {
+    content.push({
+      type: 'image',
+      source: { type: 'base64', media_type: uploadedImageMediaType, data: uploadedImageBase64 }
+    });
+  }
+  content.push({ type: 'text', text: promptText });
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: content }]
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'API-fel');
+    const text = data.content?.[0]?.text || 'Inget svar genererades.';
+    resultEl.innerHTML = formatOffer(text);
+  } catch(e) {
+    resultEl.innerHTML = '<span style="color:#FF8080">Fel: ' + e.message + '</span>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Generera offert';
+  }
+}
+
+function formatOffer(text) {
+  return text
+    .replace(/^(📋[^\n]+|🔧[^\n]+|⏱️[^\n]+|💰[^\n]+|📝[^\n]+)/gm, '<div class="section-header">$1</div>')
+    .replace(/\n/g, '<br/>');
+}
+
+function copyOffer() {
+  const text = document.getElementById('offer-result').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ Kopierat!';
+    setTimeout(() => btn.textContent = 'Kopiera', 2000);
+  });
+}
+</script>
+</body>
+</html>

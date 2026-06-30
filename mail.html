@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SecondBrain — AI Mailassistent</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+  :root {
+    --bg: #0A0A0F; --surface: #12121A; --surface2: #1A1A26;
+    --border: #252535; --accent: #6C47FF; --accent-soft: #8B6BFF;
+    --accent-glow: rgba(108,71,255,0.18); --text: #F0EFF8;
+    --muted: #7A798A; --success: #3ECBA5;
+    --mono: 'JetBrains Mono', monospace; --sans: 'Inter', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+  nav {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 32px; display: flex; align-items: center; gap: 32px; height: 56px;
+  }
+  .logo { font-family: var(--mono); font-weight: 600; font-size: 0.95rem; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link { padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; color: var(--muted); text-decoration: none; transition: all 0.2s; }
+  .nav-link:hover, .nav-link.active { color: var(--text); background: var(--surface2); }
+  .page { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-size: 1.4rem; font-weight: 600; }
+  .page-header p { color: var(--muted); font-size: 0.88rem; margin-top: 4px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .card-header h2 { font-size: 0.9rem; font-weight: 600; }
+  .card-body { padding: 20px; }
+  label { display: block; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  textarea, select {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: var(--sans);
+    font-size: 0.88rem; padding: 12px 14px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s; resize: none;
+  }
+  textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .btn-primary {
+    width: 100%; background: var(--accent); color: #fff; border: none;
+    border-radius: 10px; padding: 14px; font-size: 0.9rem; font-weight: 600;
+    font-family: var(--sans); cursor: pointer; margin-top: 12px;
+    transition: all 0.2s; box-shadow: 0 4px 16px rgba(108,71,255,0.3);
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-soft); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .result-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; font-size: 0.88rem;
+    line-height: 1.7; min-height: 200px; white-space: pre-wrap;
+    color: var(--text);
+  }
+  .copy-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    font-family: var(--mono); font-size: 0.7rem; padding: 5px 12px;
+    border-radius: 6px; cursor: pointer; margin-top: 10px; transition: all 0.2s;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+  .thinking { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; padding: 20px; text-align: center; }
+  .form-group { margin-bottom: 14px; }
+  select { appearance: none; cursor: pointer; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">second<span>brain</span>.ai</div>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">🧠 AI-analys</a>
+    <a href="service.html" class="nav-link">🔧 Servicehantering</a>
+    <a href="mail.html" class="nav-link active">✉️ AI-mail</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>✉️ AI Mailassistent</h1>
+    <p>Klistra in ett inkommet mail — AI skriver ett färdigt svar åt dig</p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header"><h2>Inkommet mail</h2></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Ton på svaret</label>
+          <select id="tone">
+            <option value="professionell">Professionell</option>
+            <option value="vänlig">Vänlig & personlig</option>
+            <option value="kort">Kort & koncis</option>
+            <option value="säljande">Säljande</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mailinnehåll</label>
+          <textarea id="incoming-mail" rows="10" placeholder="Klistra in det inkomna mailet här..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Extra instruktioner (valfritt)</label>
+          <textarea id="extra" rows="2" placeholder="T.ex. nämn att vi har ledig tid tisdag, erbjud 10% rabatt..." style="min-height:60px"></textarea>
+        </div>
+        <button class="btn-primary" id="gen-btn" onclick="generateReply()">⚡ Generera svar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Förslag på svar</h2></div>
+      <div class="card-body">
+        <div class="result-box" id="result">Ditt AI-genererade mailsvar visas här...</div>
+        <button class="copy-btn" onclick="copyReply()">Kopiera svar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function generateReply() {
+  const mail = document.getElementById('incoming-mail').value.trim();
+  const tone = document.getElementById('tone').value;
+  const extra = document.getElementById('extra').value.trim();
+  if (!mail) { alert('Klistra in ett mail först!'); return; }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.textContent = 'Genererar...';
+  document.getElementById('result').innerHTML = '<div class="thinking">AI skriver ditt svar...</div>';
+
+  const prompt = `Du är en professionell assistent för ett hantverksföretag (kan vara t.ex. el, VVS, lås, larm, bygg, ventilation eller liknande bransch).
+
+Ett mail har kommit in:
+---
+${mail}
+---
+
+${extra ? `Extra instruktioner: ${extra}` : ''}
+
+Skriv ett ${tone} svar på svenska. Svaret ska vara redo att skicka direkt utan att behöva redigeras. Inkludera inte ämnesrad. Börja direkt med hälsningsfrasen.`;
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    document.getElementById('result').textContent = data.content?.[0]?.text || 'Inget svar genererades.';
+  } catch(e) {
+    document.getElementById('result').textContent = 'Fel: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Generera svar';
+  }
+}
+
+function copyReply() {
+  const text = document.getElementById('result').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ Kopierat!';
+    setTimeout(() => btn.textContent = 'Kopiera svar', 2000);
+  });
+}
+</script>
+</body>
+</html>
