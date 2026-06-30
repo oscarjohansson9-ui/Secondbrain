@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OnBrain — Logga in</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0E0D0F;
+    --surface: #1B181C;
+    --surface2: #221F23;
+    --border: #2E2A2F;
+    --coral: #FF8B5E;
+    --coral-soft: #FFB088;
+    --coral-glow: rgba(255,139,94,0.16);
+    --text: #F4EFE9;
+    --muted: #9A8F88;
+    --muted-soft: #6E655F;
+    --danger: #FF6B6B;
+    --serif: 'Fraunces', serif;
+    --sans: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .auth-wrap { width: 100%; max-width: 400px; }
+
+  .brand {
+    text-align: center;
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    margin-bottom: 36px;
+  }
+  .brand em { font-style: normal; color: var(--coral); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 32px;
+  }
+
+  .tabs {
+    display: flex;
+    background: var(--surface2);
+    border-radius: 100px;
+    padding: 4px;
+    margin-bottom: 28px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 9px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    font-family: var(--sans);
+  }
+  .tab.active { background: var(--coral); color: #1A1210; }
+
+  .form-group { margin-bottom: 16px; }
+  label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.92rem;
+    padding: 13px 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus { border-color: var(--coral); box-shadow: 0 0 0 3px var(--coral-glow); }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--coral);
+    color: #1A1210;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    font-family: var(--sans);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(255,139,94,0.25);
+  }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,139,94,0.4); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .error-msg {
+    background: rgba(255,107,107,0.08);
+    border: 1px solid rgba(255,107,107,0.25);
+    color: var(--danger);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .success-msg {
+    background: rgba(62,203,165,0.08);
+    border: 1px solid rgba(62,203,165,0.25);
+    color: #3ECBA5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .hint {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--muted-soft);
+    margin-top: 20px;
+    font-family: var(--mono);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="brand">on<em>brain</em></div>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="switchTab('login')">Logga in</button>
+      <button class="tab" id="tab-signup" onclick="switchTab('signup')">Skapa konto</button>
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+    <div class="success-msg" id="success-msg"></div>
+
+    <!-- LOGIN PANEL -->
+    <div class="panel active" id="panel-login">
+      <div class="form-group">
+        <label>E-post</label>
+        <input type="email" id="login-email" placeholder="dig@foretag.se" />
+      </div>
+      <div class="form-group">
+        <label>Lösenord</label>
+        <input type="password" id="login-password" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" id="login-btn" onclick="handleLogin()">Logga in</button>
+    </div>
+
+    <!-- SIGNUP PANEL -->
+    <div class="panel" id="panel-signup">
+      <div class="form-group">
+        <label>Företagsnamn</label>
+        <input type="text" id="signup-company" placeholder="T.ex. Låssnabben AB" />
+      </div>
+      <div class="form-group">
+        <label>E-post</label>
+        <input type="email" id="signup-email" placeholder="dig@foretag.se" />
+      </div>
+      <div class="form-group">
+        <label>Lösenord</label>
+        <input type="password" id="signup-password" placeholder="Minst 6 tecken" />
+      </div>
+      <button class="btn-primary" id="signup-btn" onclick="handleSignup()">Skapa konto</button>
+    </div>
+  </div>
+
+  <div class="hint">Era data är privata och delas aldrig</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ====== BYT UT DESSA TVÅ VÄRDEN MOT DINA EGNA ======
+const SUPABASE_URL = "DIN_SUPABASE_URL_HÄR";
+const SUPABASE_ANON_KEY = "DIN_PUBLISHABLE_KEY_HÄR";
+// =====================================================
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// If already logged in, redirect straight to app
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) window.location.href = "index.html";
+})();
+
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+  document.getElementById('panel-signup').classList.toggle('active', tab === 'signup');
+  hideMessages();
+}
+
+function hideMessages() {
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('success-msg').style.display = 'none';
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('success-msg').style.display = 'none';
+}
+
+function showSuccess(msg) {
+  const el = document.getElementById('success-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('error-msg').style.display = 'none';
+}
+
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  hideMessages();
+
+  if (!email || !password) { showError('Fyll i e-post och lösenord.'); return; }
+
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.textContent = 'Loggar in...';
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false;
+  btn.textContent = 'Logga in';
+
+  if (error) {
+    showError(error.message === 'Invalid login credentials' ? 'Fel e-post eller lösenord.' : error.message);
+    return;
+  }
+
+  window.location.href = "index.html";
+}
+
+async function handleSignup() {
+  const company = document.getElementById('signup-company').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  hideMessages();
+
+  if (!company || !email || !password) { showError('Fyll i alla fält.'); return; }
+  if (password.length < 6) { showError('Lösenordet måste vara minst 6 tecken.'); return; }
+
+  const btn = document.getElementById('signup-btn');
+  btn.disabled = true;
+  btn.textContent = 'Skapar konto...';
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { company_name: company, plan: 'pro' } }
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Skapa konto';
+
+  if (error) {
+    showError(error.message);
+    return;
+  }
+
+  if (data.session) {
+    // Email confirmation is OFF in Supabase settings - go straight in
+    window.location.href = "index.html";
+  } else {
+    // Email confirmation is ON - tell them to check inbox
+    showSuccess('Konto skapat! Kolla din mail för att bekräfta innan du loggar in.');
+  }
+}
+
+// Enter key support
+document.getElementById('login-password').addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
+document.getElementById('signup-password').addEventListener('keypress', e => { if (e.key === 'Enter') handleSignup(); });
+</script>
+</body>
+</html>
