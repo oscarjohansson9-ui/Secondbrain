@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OnBrain — En andra hjärna för ditt hantverksföretag</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0E0D0F;
+    --bg-soft: #161417;
+    --surface: #1B181C;
+    --surface2: #221F23;
+    --border: #2E2A2F;
+    --coral: #FF8B5E;
+    --coral-soft: #FFB088;
+    --coral-glow: rgba(255,139,94,0.16);
+    --sand: #E8DFD4;
+    --text: #F4EFE9;
+    --muted: #9A8F88;
+    --muted-soft: #6E655F;
+    --serif: 'Fraunces', serif;
+    --sans: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  ::selection { background: var(--coral); color: var(--bg); }
+
+  a { color: inherit; text-decoration: none; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  /* ================= NAV ================= */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(14,13,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.wrap {
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .brand em { font-style: normal; color: var(--coral); }
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--coral);
+    color: #1A1210;
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,139,94,0.35); }
+  @media (max-width: 760px) { .nav-links { display: none; } }
+
+  /* ================= HERO ================= */
+  .hero {
+    padding: 110px 0 90px;
+    text-align: center;
+    position: relative;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--coral-soft);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--coral-glow);
+    border: 1px solid rgba(255,139,94,0.25);
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 6vw, 4.3rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    max-width: 800px;
+    margin: 0 auto 24px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--coral);
+    font-weight: 400;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 1.1rem;
+    max-width: 540px;
+    margin: 0 auto 36px;
+    line-height: 1.65;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .btn-coral {
+    background: var(--coral);
+    color: #1A1210;
+    padding: 15px 30px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 28px rgba(255,139,94,0.25);
+  }
+  .btn-coral:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(255,139,94,0.4); }
+  .btn-ghost {
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 15px 30px;
+    border-radius: 100px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--muted); background: var(--surface); }
+  .hero-note {
+    font-size: 0.82rem;
+    color: var(--muted-soft);
+    font-family: var(--mono);
+  }
+
+  /* ================= DEMO CHAT (signature element) ================= */
+  .demo {
+    max-width: 580px;
+    margin: 64px auto 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    text-align: left;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+  }
+  .demo-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-soft);
+  }
+  .demo-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
+  .demo-label { font-family: var(--mono); font-size: 0.72rem; color: var(--muted-soft); margin-left: 6px; }
+  .demo-body { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+
+  .msg {
+    max-width: 86%;
+    padding: 13px 17px;
+    border-radius: 16px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: rise 0.5s ease forwards;
+  }
+  .msg.user {
+    align-self: flex-end;
+    background: var(--coral);
+    color: #1A1210;
+    border-bottom-right-radius: 4px;
+    font-weight: 500;
+  }
+  .msg.ai {
+    align-self: flex-start;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    color: var(--sand);
+  }
+  .msg.ai .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    color: var(--coral-soft);
+    background: var(--coral-glow);
+    padding: 2px 9px;
+    border-radius: 100px;
+    margin-bottom: 7px;
+    letter-spacing: 0.04em;
+  }
+  .msg.delay1 { animation-delay: 0.3s; }
+  .msg.delay2 { animation-delay: 1.0s; }
+  .msg.delay3 { animation-delay: 1.5s; }
+  .msg.delay4 { animation-delay: 2.0s; }
+  .msg.delay5 { animation-delay: 2.5s; }
+
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+  /* ================= SECTION SHARED ================= */
+  section { padding: 100px 0; }
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--coral-soft);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    line-height: 1.18;
+    letter-spacing: -0.01em;
+    max-width: 620px;
+  }
+  .section-title em { font-style: italic; color: var(--coral); font-weight: 400; }
+
+  /* ================= PROBLEM / SOLUTION ================= */
+  .problem {
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 48px;
+  }
+  @media (max-width: 720px) { .compare { grid-template-columns: 1fr; } }
+  .compare-col { background: var(--bg-soft); padding: 36px 32px; }
+  .compare-col.after { background: var(--surface); }
+  .compare-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    color: var(--muted-soft);
+  }
+  .compare-col.after .compare-label { color: var(--coral-soft); }
+  .compare-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 13px 0;
+    font-size: 0.94rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+  .compare-item:first-of-type { border-top: none; }
+  .compare-col.after .compare-item { color: var(--sand); }
+  .compare-icon { flex-shrink: 0; margin-top: 1px; }
+
+  /* ================= MODULES ================= */
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-top: 56px;
+  }
+  @media (max-width: 900px) { .modules-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .modules-grid { grid-template-columns: 1fr; } }
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 24px;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+  .module-card:hover { border-color: rgba(255,139,94,0.4); transform: translateY(-3px); }
+  .module-icon {
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--coral-glow);
+    border-radius: 12px;
+    font-size: 1.3rem;
+    margin-bottom: 18px;
+  }
+  .module-card h3 { font-size: 1.02rem; font-weight: 600; margin-bottom: 8px; }
+  .module-card p { font-size: 0.86rem; color: var(--muted); line-height: 1.6; }
+  .module-tier {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+  .module-tier.pro { background: rgba(255,139,94,0.12); color: var(--coral-soft); }
+  .module-tier.ent { background: rgba(232,223,212,0.1); color: var(--sand); }
+
+  /* ================= HOW IT WORKS ================= */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 56px;
+    position: relative;
+  }
+  @media (max-width: 880px) { .steps { grid-template-columns: 1fr; gap: 32px; } }
+  .step {
+    position: relative;
+    padding-right: 24px;
+  }
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    right: 0;
+    width: 24px;
+    height: 1px;
+    background: var(--border);
+  }
+  @media (max-width: 880px) { .step:not(:last-child)::after { display: none; } }
+  .step-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.3rem;
+    color: var(--coral);
+    margin-bottom: 14px;
+  }
+  .step h3 { font-size: 0.98rem; font-weight: 600; margin-bottom: 8px; }
+  .step p { font-size: 0.86rem; color: var(--muted); line-height: 1.6; }
+
+  /* ================= PRICING ================= */
+  .pricing {
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .price-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 56px;
+  }
+  @media (max-width: 720px) { .price-grid { grid-template-columns: 1fr; } }
+  .price-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 40px 36px;
+    position: relative;
+  }
+  .price-card.featured {
+    border-color: var(--coral);
+    background: linear-gradient(180deg, rgba(255,139,94,0.06), transparent 40%), var(--surface);
+  }
+  .price-badge {
+    position: absolute;
+    top: -13px;
+    right: 32px;
+    background: var(--coral);
+    color: #1A1210;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-weight: 600;
+  }
+  .price-name { font-family: var(--serif); font-size: 1.4rem; margin-bottom: 6px; }
+  .price-desc { color: var(--muted); font-size: 0.86rem; margin-bottom: 24px; }
+  .price-amount { display: flex; align-items: baseline; gap: 6px; margin-bottom: 28px; }
+  .price-amount .num { font-family: var(--serif); font-size: 2.6rem; font-weight: 500; }
+  .price-amount .per { color: var(--muted); font-size: 0.9rem; }
+  .price-list { display: flex; flex-direction: column; gap: 13px; margin-bottom: 30px; }
+  .price-list li { display: flex; gap: 10px; font-size: 0.88rem; color: var(--sand); list-style: none; }
+  .price-list .ck { color: var(--coral); flex-shrink: 0; }
+  .price-btn {
+    display: block;
+    text-align: center;
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .price-card .price-btn { border: 1px solid var(--border); color: var(--text); }
+  .price-card .price-btn:hover { border-color: var(--muted); }
+  .price-card.featured .price-btn { background: var(--coral); color: #1A1210; }
+  .price-card.featured .price-btn:hover { box-shadow: 0 8px 24px rgba(255,139,94,0.3); }
+
+  /* ================= CTA ================= */
+  .cta-section { text-align: center; padding: 120px 0; }
+  .cta-section h2 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    font-weight: 500;
+    max-width: 620px;
+    margin: 0 auto 20px;
+    line-height: 1.15;
+  }
+  .cta-section h2 em { font-style: italic; color: var(--coral); }
+  .cta-section p { color: var(--muted); margin-bottom: 36px; }
+
+  /* ================= FOOTER ================= */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 48px 0;
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .footer-brand { font-family: var(--serif); font-size: 1.05rem; }
+  .footer-brand em { font-style: normal; color: var(--coral); }
+  .footer-meta { font-size: 0.82rem; color: var(--muted-soft); }
+  .footer-links { display: flex; gap: 24px; font-size: 0.85rem; color: var(--muted); }
+  .footer-links a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <div class="brand">on<em>brain</em></div>
+    <div class="nav-links">
+      <a href="#what">Vad du får</a>
+      <a href="#funkar">Så funkar det</a>
+      <a href="#pricing">Pris</a>
+    </div>
+    <a href="index.html" class="nav-cta">Kom igång</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow">● Lås · El · VVS · Larm · Bygg — alla hantverksföretag</div>
+    <h1>Allt du bär i huvudet,<br/><em>en hjärna som minns det åt dig</em></h1>
+    <p>Service som missas. Mail som hopar sig. Offerter som tar för lång tid att skriva. OnBrain sköter grovjobbet i bakgrunden — oavsett bransch — så du gör jobbet du faktiskt är bra på.</p>
+    <div class="hero-actions">
+      <a href="index.html" class="btn-coral">Kom igång →</a>
+      <a href="#funkar" class="btn-ghost">Så funkar det</a>
+    </div>
+    <div class="hero-note">Ni äger er data. Ingen bindningstid.</div>
+
+    <!-- SIGNATURE DEMO -->
+    <div class="demo">
+      <div class="demo-bar">
+        <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+        <div class="demo-label">tekniker@dittforetag.se</div>
+      </div>
+      <div class="demo-body">
+        <div class="msg user delay1">Var hos Andersson Fastigheter idag och bytte ut värmepumpen i pannrummet. Påminn mig om service om 12 månader.</div>
+        <div class="msg ai delay2"><span class="tag">✓ NOTERAT</span>Installation sparad. Servicepåminnelse skickas till er automatiskt i juni nästa år.</div>
+        <div class="msg user delay3">Kund mailade och undrar varför det låter konstigt sen igår</div>
+        <div class="msg ai delay4"><span class="tag">✉ UTKAST KLART</span>Svar skrivet och redo att skicka — förklarar vad ljudet troligen beror på och föreslår ett kostnadsfritt besök denna vecka.</div>
+        <div class="msg ai delay5" style="background:transparent; border:none; color:var(--muted-soft); font-size:0.8rem; font-family:var(--mono)">Allt sparat. Inget att komma ihåg.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="problem" id="what">
+  <div class="wrap">
+    <div class="section-eyebrow">Känner du igen dig?</div>
+    <h2 class="section-title">Det mesta sitter i <em>huvudet på dig</em> eller på en lapp någonstans</h2>
+    <div class="compare">
+      <div class="compare-col">
+        <div class="compare-label">Idag</div>
+        <div class="compare-item"><span class="compare-icon">○</span>Service missas eftersom ingen kommer ihåg datumet</div>
+        <div class="compare-item"><span class="compare-icon">○</span>Mail hopar sig, samma svar skrivs om och om igen</div>
+        <div class="compare-item"><span class="compare-icon">○</span>Offerter tar en kväll att räkna ihop för hand</div>
+        <div class="compare-item"><span class="compare-icon">○</span>Allt sitter i ditt huvud — funkar inte de dagar du är borta</div>
+      </div>      <div class="compare-col after">
+        <div class="compare-label">Med OnBrain</div>
+        <div class="compare-item"><span class="compare-icon">●</span>Servicepåminnelser skickas automatiskt, i tid, varje gång</div>
+        <div class="compare-item"><span class="compare-icon">●</span>AI skriver svarsutkast på sekunder, du godkänner</div>
+        <div class="compare-item"><span class="compare-icon">●</span>En bild av dörren räcker — offerten är klar på en minut</div>
+        <div class="compare-item"><span class="compare-icon">●</span>Allt ligger samlat, redo för vem som helst i teamet</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="funkar-modules">
+  <div class="wrap">
+    <div class="section-eyebrow">Vad du får</div>
+    <h2 class="section-title">Fyra verktyg. <em>En hjärna</em> som binder ihop dem.</h2>
+    <div class="modules-grid">
+      <div class="module-card">
+        <div class="module-icon">🧠</div>
+        <h3>Flaskhalsanalys</h3>
+        <p>Beskriv var ni kör fast — få en konkret plan med rotorsak, snabba åtgärder och vad ni bör göra på sikt.</p>
+        <span class="module-tier pro">PRO</span>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">🔧</div>
+        <h3>Servicehantering</h3>
+        <p>Registrera varje uppdrag en gång. Påminnelser om kommande service skickas automatiskt, i tid.</p>
+        <span class="module-tier pro">PRO</span>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">✉️</div>
+        <h3>AI-mailassistent</h3>
+        <p>Klistra in ett inkommet mail, välj ton — få ett färdigt svar redo att skickas på sekunder.</p>
+        <span class="module-tier ent">ENTERPRISE</span>
+      </div>
+      <div class="module-card">
+        <div class="module-icon">📋</div>
+        <h3>Offertgenerator</h3>
+        <p>Ladda upp en bild eller beskriv jobbet. AI matchar mot er prislista och skriver offerten åt er — oavsett bransch.</p>
+        <span class="module-tier ent">ENTERPRISE</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="funkar">
+  <div class="wrap">
+    <div class="section-eyebrow">Så funkar det</div>
+    <h2 class="section-title">Från första loggin till <em>allt sköter sig</em></h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">i.</div>
+        <h3>Skapa konto</h3>
+        <p>Logga in, lägg till ert team. Inget att installera, ingen teknisk kompetens krävs.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">ii.</div>
+        <h3>Mata in det ni vet</h3>
+        <p>Lägg in pågående installationer och er prislista. Tar några minuter, inte dagar.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">iii.</div>
+        <h3>AI tar över grovjobbet</h3>
+        <p>Påminnelser, mailsvar och offerter sköter sig i bakgrunden från dag ett.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">iv.</div>
+        <h3>Ni växer i er takt</h3>
+        <p>Börja med det ni behöver mest. Lägg till mer när det känns rätt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="section-eyebrow">Pris</div>
+    <h2 class="section-title">Enkel prissättning, <em>inga överraskningar</em></h2>
+    <div class="price-grid">
+      <div class="price-card">
+        <div class="price-name">Pro</div>
+        <div class="price-desc">För er som vill sluta missa service</div>
+        <div class="price-amount"><span class="num">900 kr</span><span class="per">/ månad</span></div>
+        <ul class="price-list">
+          <li><span class="ck">✓</span>AI-flaskhalsanalys</li>
+          <li><span class="ck">✓</span>Servicehantering & automatiska påminnelser</li>
+          <li><span class="ck">✓</span>Obegränsat antal installationer</li>
+          <li><span class="ck">✓</span>E-postsupport</li>
+        </ul>
+        <a href="index.html" class="price-btn">Kom igång</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">MEST POPULÄR</div>
+        <div class="price-name">Enterprise</div>
+        <div class="price-desc">För er som vill att allt sköter sig</div>
+        <div class="price-amount"><span class="num">5 000 kr</span><span class="per">/ månad</span></div>
+        <ul class="price-list">
+          <li><span class="ck">✓</span>Allt i Pro</li>
+          <li><span class="ck">✓</span>AI-mailassistent med färdiga svarsutkast</li>
+          <li><span class="ck">✓</span>Offertgenerator med er egen prislista</li>
+          <li><span class="ck">✓</span>Bildanalys för snabba offertunderlag</li>
+          <li><span class="ck">✓</span>Prioriterad support</li>
+        </ul>
+        <a href="index.html" class="price-btn">Kom igång</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="wrap">
+    <h2>Sluta bära allt <em>i huvudet.</em></h2>
+    <p>Sätt upp ert konto på några minuter. Inget kort krävs för att testa.</p>
+    <a href="index.html" class="btn-coral">Kom igång gratis →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div>
+      <div class="footer-brand">on<em>brain</em></div>
+      <div class="footer-meta">Er andra hjärna för service, mail och offerter</div>
+    </div>
+    <div class="footer-links">
+      <a href="#what">Vad du får</a>
+      <a href="#funkar">Så funkar det</a>
+      <a href="#pricing">Pris</a>
+    </div>
+    <div class="footer-meta">© 2026 OnBrain</div>
+  </div>
+</footer>
+
+</body>
+</html>
