@@ -114,7 +114,13 @@ const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 async function checkout(priceId, plan) {
   const { data: { session } } = await sb.auth.getSession();
-  if (!session) { window.location.href = 'login.html'; return; }
+  if (!session) { 
+    // Spara vald plan och skicka till login
+    localStorage.setItem('selected_plan', priceId);
+    localStorage.setItem('selected_plan_name', plan);
+    window.location.href = 'login.html'; 
+    return; 
+  }
 
   const btnId = plan === 'pro' ? 'btn-pro' : 'btn-enterprise';
   const btn = document.getElementById(btnId);
