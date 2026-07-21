@@ -33,7 +33,10 @@ export default async function handler(req, res) {
     const session = await response.json();
 
     if (!response.ok) {
-      return res.status(400).json({ error: session.error?.message || 'Stripe-fel' });
+      return res.status(400).json({ 
+        error: session.error?.message || 'Stripe-fel', 
+        details: session 
+      });
     }
 
     res.status(200).json({ url: session.url });
