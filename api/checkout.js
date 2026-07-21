@@ -4,10 +4,12 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { priceId, email, plan } = req.body;
+  let body = req.body;
+  if (typeof body === 'string') body = JSON.parse(body);
+  const { priceId, email, plan } = body || {};
 
   if (!priceId) {
-    return res.status(400).json({ error: 'Saknar priceId eller email' });
+    return res.status(400).json({ error: 'Saknar priceId' });
   }
 
   try {
@@ -20,12 +22,11 @@ export default async function handler(req, res) {
       body: new URLSearchParams({
         'payment_method_types[]': 'card',
         'mode': 'subscription',
-        'customer_email': email,
         'line_items[0][price]': priceId,
         'line_items[0][quantity]': '1',
-        'success_url': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://secondbrain-one-tau.vercel.app'}/app.html?payment=success&plan=${plan}`,
-        'cancel_url': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://secondbrain-one-tau.vercel.app'}/pricing.html`,
-        'metadata[plan]': plan
+        'success_url': 'https://secondbrain-one-tau.vercel.app/app.html?payment=success',
+        'cancel_url': 'https://secondbrain-one-tau.vercel.app/pricing.html',
+        'metadata[plan]': plan || ''
       })
     });
 
