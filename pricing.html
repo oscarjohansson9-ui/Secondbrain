@@ -69,7 +69,7 @@
         <li><span class="ck">✓</span>Obegränsat antal installationer</li>
         <li><span class="ck">✓</span>E-postsupport</li>
       </ul>
-      <button class="btn btn-outline" id="btn-pro" onclick="checkout('price_1To7fjFJioKlj4bRjAVAGvra', 'pro')">Kom igång med Pro</button>
+      <button class="btn btn-outline" id="btn-pro" onclick="checkout('price_1To7fjFJioKIj4bRjAVAGvra', 'pro')">Kom igång med Pro</button>
     </div>
 
     <div class="card featured">
@@ -84,7 +84,7 @@
         <li><span class="ck">✓</span>Bildanalys för snabba offertunderlag</li>
         <li><span class="ck">✓</span>Prioriterad support</li>
       </ul>
-      <button class="btn btn-coral" id="btn-enterprise" onclick="checkout('price_1To7gxFJioKlj4bRWgdQwGCN', 'enterprise')">Kom igång med Enterprise</button>
+      <button class="btn btn-coral" id="btn-enterprise" onclick="checkout('price_1To7gxFJioKIj4bRWgdQwGCN', 'enterprise')">Kom igång med Enterprise</button>
     </div>
   </div>
 
@@ -101,7 +101,7 @@ async function checkout(priceId, plan) {
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priceId, email: '', plan })
+      body: JSON.stringify({ priceId: priceId, plan: plan })
     });
 
     const data = await res.json();
