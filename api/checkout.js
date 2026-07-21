@@ -6,7 +6,7 @@ export default async function handler(req, res) {
 
   const { priceId, email, plan } = req.body;
 
-  if (!priceId || !email) {
+  if (!priceId) {
     return res.status(400).json({ error: 'Saknar priceId eller email' });
   }
 
