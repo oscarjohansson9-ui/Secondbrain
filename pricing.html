@@ -113,14 +113,28 @@ const SUPA_KEY = "sb_publishable_0BxO282ZNBxUD1bf-UTaUg_jRqKAswX";
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 async function checkout(priceId, plan) {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) { 
-    // Spara vald plan och skicka till login
-    localStorage.setItem('selected_plan', priceId);
-    localStorage.setItem('selected_plan_name', plan);
-    window.location.href = 'login.html'; 
-    return; 
+  const btn = document.getElementById('btn-' + plan);
+  btn.disabled = true;
+  btn.textContent = 'Laddar...';
+
+  try {
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priceId, email: '', plan })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Något gick fel');
+    }
+  } catch(err) {
+    alert('Fel: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = plan === 'pro' ? 'Kom igång med Pro' : 'Kom igång med Enterprise';
   }
+}
 
   const btnId = plan === 'pro' ? 'btn-pro' : 'btn-enterprise';
   const btn = document.getElementById(btnId);
