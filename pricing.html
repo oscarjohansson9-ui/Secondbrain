@@ -14,47 +14,36 @@
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; }
-
   header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; display:flex; align-items:center; justify-content:space-between; height:56px; }
   .brand { font-family:var(--serif); font-size:1.1rem; font-weight:500; }
   .brand em { font-style:normal; color:var(--coral); }
   .back-link { font-size:0.85rem; color:var(--muted); text-decoration:none; }
   .back-link:hover { color:var(--text); }
-
   .page { max-width:860px; margin:0 auto; padding:64px 24px; text-align:center; }
-  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--coral-soft); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:16px; }
+  .eyebrow { font-size:0.72rem; color:var(--coral-soft); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:16px; }
   h1 { font-family:var(--serif); font-size:clamp(2rem,4vw,3rem); font-weight:500; margin-bottom:14px; line-height:1.15; }
   h1 em { font-style:italic; color:var(--coral); }
   .subtitle { color:var(--muted); font-size:1rem; margin-bottom:56px; }
-
   .grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
   @media(max-width:680px) { .grid { grid-template-columns:1fr; } }
-
   .card { background:var(--surface); border:1px solid var(--border); border-radius:22px; padding:40px 36px; position:relative; text-align:left; }
   .card.featured { border-color:var(--coral); background:linear-gradient(180deg,rgba(255,139,94,0.06),transparent 40%),var(--surface); }
-  .badge { position:absolute; top:-13px; right:32px; background:var(--coral); color:#1A1210; font-size:0.68rem; font-weight:700; padding:5px 14px; border-radius:100px; letter-spacing:0.04em; }
-
+  .badge { position:absolute; top:-13px; right:32px; background:var(--coral); color:#1A1210; font-size:0.68rem; font-weight:700; padding:5px 14px; border-radius:100px; }
   .plan-name { font-family:var(--serif); font-size:1.4rem; margin-bottom:6px; }
   .plan-desc { color:var(--muted); font-size:0.86rem; margin-bottom:24px; }
   .plan-price { display:flex; align-items:baseline; gap:6px; margin-bottom:28px; }
   .plan-price .num { font-family:var(--serif); font-size:2.6rem; font-weight:500; }
   .plan-price .per { color:var(--muted); font-size:0.9rem; }
-
   .features { display:flex; flex-direction:column; gap:13px; margin-bottom:32px; list-style:none; }
   .features li { display:flex; gap:10px; font-size:0.88rem; color:var(--sand); }
   .features .ck { color:var(--coral); flex-shrink:0; }
-
   .btn { display:block; width:100%; text-align:center; padding:15px; border-radius:12px; font-weight:700; font-size:0.92rem; cursor:pointer; border:none; font-family:var(--sans); transition:all 0.2s; }
   .btn-outline { background:none; border:1px solid var(--border); color:var(--text); }
   .btn-outline:hover { border-color:var(--muted); }
   .btn-coral { background:var(--coral); color:#1A1210; box-shadow:0 4px 16px rgba(255,139,94,0.25); }
   .btn-coral:hover { transform:translateY(-1px); box-shadow:0 6px 24px rgba(255,139,94,0.4); }
   .btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-
   .note { font-size:0.78rem; color:var(--muted); margin-top:48px; }
-
-  .toast { position:fixed; bottom:24px; right:24px; background:var(--surface); border:1px solid rgba(255,107,107,0.3); color:#FF8080; border-radius:12px; padding:14px 20px; font-size:0.88rem; box-shadow:0 8px 32px rgba(0,0,0,0.4); transform:translateY(80px); opacity:0; transition:all 0.3s; z-index:100; }
-  .toast.show { transform:translateY(0); opacity:1; }
 </style>
 </head>
 <body>
@@ -70,7 +59,6 @@
   <p class="subtitle">Välj den plan som passar er verksamhet. Avsluta när som helst.</p>
 
   <div class="grid">
-    <!-- PRO -->
     <div class="card">
       <div class="plan-name">Pro</div>
       <div class="plan-desc">För er som vill sluta missa service</div>
@@ -81,10 +69,9 @@
         <li><span class="ck">✓</span>Obegränsat antal installationer</li>
         <li><span class="ck">✓</span>E-postsupport</li>
       </ul>
-      <button class="btn btn-outline" onclick="checkout('price_1To7fjFJioKlj4bRjAVAGvra', 'pro')" id="btn-pro">Kom igång med Pro</button>
+      <button class="btn btn-outline" id="btn-pro" onclick="checkout('price_1To7fjFJioKlj4bRjAVAGvra', 'pro')">Kom igång med Pro</button>
     </div>
 
-    <!-- ENTERPRISE -->
     <div class="card featured">
       <div class="badge">MEST POPULÄR</div>
       <div class="plan-name">Enterprise</div>
@@ -97,21 +84,14 @@
         <li><span class="ck">✓</span>Bildanalys för snabba offertunderlag</li>
         <li><span class="ck">✓</span>Prioriterad support</li>
       </ul>
-      <button class="btn btn-coral" onclick="checkout('price_1To7gxFJioKlj4bRWgdQwGCN', 'enterprise')" id="btn-enterprise">Kom igång med Enterprise</button>
+      <button class="btn btn-coral" id="btn-enterprise" onclick="checkout('price_1To7gxFJioKlj4bRWgdQwGCN', 'enterprise')">Kom igång med Enterprise</button>
     </div>
   </div>
 
   <p class="note">Betalning sker säkert via Stripe. Inga dolda avgifter. Avsluta när som helst.</p>
 </div>
 
-<div class="toast" id="toast"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPA_URL = "https://nbtvsojkkrfamvfnddoc.supabase.co";
-const SUPA_KEY = "sb_publishable_0BxO282ZNBxUD1bf-UTaUg_jRqKAswX";
-const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-
 async function checkout(priceId, plan) {
   const btn = document.getElementById('btn-' + plan);
   btn.disabled = true;
@@ -123,7 +103,9 @@ async function checkout(priceId, plan) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ priceId, email: '', plan })
     });
+
     const data = await res.json();
+
     if (data.url) {
       window.location.href = data.url;
     } else {
@@ -134,39 +116,6 @@ async function checkout(priceId, plan) {
     btn.disabled = false;
     btn.textContent = plan === 'pro' ? 'Kom igång med Pro' : 'Kom igång med Enterprise';
   }
-}
-
-  const btnId = plan === 'pro' ? 'btn-pro' : 'btn-enterprise';
-  const btn = document.getElementById(btnId);
-  btn.disabled = true;
-  btn.textContent = 'Laddar...';
-
-  try {
-    const res = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priceId, email: session.user.email, plan })
-    });
-
-    const data = await res.json();
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error(data.error || 'Något gick fel');
-    }
-  } catch(err) {
-    showToast('Fel: ' + err.message);
-    btn.disabled = false;
-    btn.textContent = plan === 'pro' ? 'Kom igång med Pro' : 'Kom igång med Enterprise';
-  }
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 4000);
 }
 </script>
 </body>
