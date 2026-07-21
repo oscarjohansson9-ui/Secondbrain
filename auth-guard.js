@@ -10,7 +10,7 @@ let currentPlan = null;
 async function requireAuth() {
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) {
-    window.location.href = "login.html";
+    window.location.href = "app.html";
     return null;
   }
   currentUser = session.user;
@@ -41,7 +41,7 @@ function renderUserBadge() {
 
 async function handleLogout() {
   await _sb.auth.signOut();
-  window.location.href = "login.html";
+  window.location.href = "app.html";
 }
 
 // Run immediately on every page that includes this script
