@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OnBrain — Välj plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap');
+  :root {
+    --bg:#0E0D0F; --surface:#1B181C; --surface2:#221F23; --border:#2E2A2F;
+    --coral:#FF8B5E; --coral-soft:#FFB088; --coral-glow:rgba(255,139,94,0.16);
+    --text:#F4EFE9; --muted:#9A8F88; --sand:#E8DFD4;
+    --serif:'Fraunces',serif; --sans:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; }
+  header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; display:flex; align-items:center; justify-content:space-between; height:56px; }
+  .brand { font-family:var(--serif); font-size:1.1rem; font-weight:500; }
+  .brand em { font-style:normal; color:var(--coral); }
+  .back-link { font-size:0.85rem; color:var(--muted); text-decoration:none; }
+  .back-link:hover { color:var(--text); }
+  .page { max-width:1000px; margin:0 auto; padding:56px 24px; text-align:center; }
+  .eyebrow { font-size:0.72rem; color:var(--coral-soft); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:16px; font-family:var(--mono); }
+  h1 { font-family:var(--serif); font-size:clamp(2rem,4vw,2.8rem); font-weight:500; margin-bottom:12px; line-height:1.15; }
+  h1 em { font-style:italic; color:var(--coral); }
+  .subtitle { color:var(--muted); font-size:0.95rem; margin-bottom:16px; }
+  .vat-note { font-family:var(--mono); font-size:0.72rem; color:var(--muted); margin-bottom:48px; }
+
+  /* STEPS */
+  .steps-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  @media(max-width:800px) { .steps-grid { grid-template-columns:1fr; } }
+
+  .step-card { background:var(--surface); border:1px solid var(--border); border-radius:22px; padding:36px 28px; position:relative; text-align:left; transition:border-color 0.2s; }
+  .step-card:hover { border-color:rgba(255,139,94,0.3); }
+  .step-card.featured { border-color:var(--coral); background:linear-gradient(180deg,rgba(255,139,94,0.06),transparent 40%),var(--surface); }
+
+  .step-badge { position:absolute; top:-13px; left:28px; background:var(--coral); color:#1A1210; font-family:var(--mono); font-size:0.68rem; padding:5px 14px; border-radius:100px; font-weight:600; }
+  .step-num { font-family:var(--mono); font-size:0.7rem; color:var(--coral-soft); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; }
+  .step-name { font-family:var(--serif); font-size:1.3rem; margin-bottom:6px; }
+  .step-desc { color:var(--muted); font-size:0.84rem; margin-bottom:20px; line-height:1.5; }
+  .step-price { display:flex; align-items:baseline; gap:6px; margin-bottom:6px; }
+  .step-price .num { font-family:var(--serif); font-size:2.2rem; font-weight:500; }
+  .step-price .per { color:var(--muted); font-size:0.86rem; }
+  .step-vat { font-family:var(--mono); font-size:0.68rem; color:var(--muted); margin-bottom:24px; }
+
+  .features { display:flex; flex-direction:column; gap:10px; margin-bottom:28px; list-style:none; }
+  .features li { display:flex; gap:10px; font-size:0.85rem; color:var(--sand); }
+  .features .ck { color:var(--coral); flex-shrink:0; }
+  .features .always { color:var(--muted); font-size:0.75rem; font-family:var(--mono); }
+
+  .btn { display:block; width:100%; text-align:center; padding:13px; border-radius:12px; font-weight:700; font-size:0.88rem; cursor:pointer; border:none; font-family:var(--sans); transition:all 0.2s; }
+  .btn-outline { background:none; border:1px solid var(--border); color:var(--text); }
+  .btn-outline:hover { border-color:var(--muted); }
+  .btn-coral { background:var(--coral); color:#1A1210; box-shadow:0 4px 16px rgba(255,139,94,0.25); }
+  .btn-coral:hover { transform:translateY(-1px); box-shadow:0 6px 24px rgba(255,139,94,0.4); }
+  .btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+  .always-included { background:var(--surface2); border:1px solid var(--border); border-radius:14px; padding:20px 24px; margin-top:28px; text-align:left; }
+  .always-label { font-family:var(--mono); font-size:0.68rem; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px; }
+  .always-items { display:flex; gap:24px; flex-wrap:wrap; }
+  .always-item { display:flex; align-items:center; gap:8px; font-size:0.84rem; color:var(--muted); }
+  .always-item .ck { color:var(--coral); }
+
+  .note { font-size:0.78rem; color:var(--muted); margin-top:20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">on<em>brain</em></div>
+  <a href="index.html" class="back-link">← Tillbaka</a>
+</header>
+
+<div class="page">
+  <div class="eyebrow">Prissättning</div>
+  <h1>Börja där ni har <em>störst smärta</em></h1>
+  <p class="subtitle">Välj det steg som passar er nu — uppgradera när ni är redo.</p>
+  <div class="vat-note">Alla priser exkl. moms · Ingen bindningstid · Avsluta när som helst</div>
+
+  <div class="steps-grid">
+
+    <!-- STEG 1 -->
+    <div class="step-card">
+      <div class="step-num">Steg 1</div>
+      <div class="step-name">Offert & Service</div>
+      <div class="step-desc">Sluta förlora jobb på offerter som tar för lång tid och service som missas.</div>
+      <div class="step-price"><span class="num">900 kr</span><span class="per">/ mån</span></div>
+      <div class="step-vat">exkl. moms</div>
+      <ul class="features">
+        <li><span class="ck">✓</span>Offertgenerator med er prislista</li>
+        <li><span class="ck">✓</span>Bildanalys — foto → färdig offert</li>
+        <li><span class="ck">✓</span>Servicehantering & automatiska påminnelser</li>
+        <li><span class="ck">✓</span>Obegränsat antal installationer</li>
+      </ul>
+      <button class="btn btn-outline" id="btn-steg1" onclick="checkout('price_1To7fjFJioKIj4bRjAVAGvra', 'steg1')">Kom igång med Steg 1</button>
+    </div>
+
+    <!-- STEG 2 -->
+    <div class="step-card featured">
+      <div class="step-badge">POPULÄRAST</div>
+      <div class="step-num">Steg 2</div>
+      <div class="step-name">+ AI-mailassistent</div>
+      <div class="step-desc">Lägg till AI som hanterar er inkorg och skriver professionella svar på sekunder.</div>
+      <div class="step-price"><span class="num">2 500 kr</span><span class="per">/ mån</span></div>
+      <div class="step-vat">exkl. moms</div>
+      <ul class="features">
+        <li><span class="ck">✓</span>Allt i Steg 1</li>
+        <li><span class="ck">✓</span>AI-mailassistent med svarsutkast</li>
+        <li><span class="ck">✓</span>Välj ton — professionell, vänlig eller kort</li>
+        <li><span class="ck">✓</span>Outlook & Gmail-integration (kommer snart)</li>
+      </ul>
+      <button class="btn btn-coral" id="btn-steg2" onclick="checkout('price_1TvxGAFJioKIj4bRGb18YfZv', 'steg2')">Kom igång med Steg 2</button>
+    </div>
+
+    <!-- STEG 3 -->
+    <div class="step-card">
+      <div class="step-num">Steg 3</div>
+      <div class="step-name">+ Arbetsorder</div>
+      <div class="step-desc">Koppla OnBrain direkt mot ert ordersystem — skapa arbetsorder automatiskt.</div>
+      <div class="step-price"><span class="num">5 000 kr</span><span class="per">/ mån</span></div>
+      <div class="step-vat">exkl. moms</div>
+      <ul class="features">
+        <li><span class="ck">✓</span>Allt i Steg 2</li>
+        <li><span class="ck">✓</span>Arbetsorder skapas automatiskt</li>
+        <li><span class="ck">✓</span>Integration mot Mowin & andra system</li>
+        <li><span class="ck">✓</span>Prioriterad support & onboarding</li>
+      </ul>
+      <button class="btn btn-outline" id="btn-steg3" onclick="checkout('price_1To7gxFJioKIj4bRWgdQwGCN', 'steg3')">Kom igång med Steg 3</button>
+    </div>
+
+  </div>
+
+  <!-- ALLTID INKLUDERAT -->
+  <div class="always-included">
+    <div class="always-label">Ingår i alla steg</div>
+    <div class="always-items">
+      <div class="always-item"><span class="ck">✓</span>Servicepåminnelser automatiskt</div>
+      <div class="always-item"><span class="ck">✓</span>Säker datalagring per konto</div>
+      <div class="always-item"><span class="ck">✓</span>Ingen bindningstid</div>
+      <div class="always-item"><span class="ck">✓</span>E-postsupport</div>
+    </div>
+  </div>
+
+  <p class="note">Betalning sker säkert via Stripe · Faktura skickas automatiskt varje månad</p>
+</div>
+
+<script>
+async function checkout(priceId, plan) {
+  const btn = document.getElementById('btn-' + plan);
+  btn.disabled = true;
+  btn.textContent = 'Laddar...';
+
+  try {
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ priceId, plan })
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Något gick fel');
+    }
+  } catch(err) {
+    alert('Fel: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = plan === 'steg1' ? 'Kom igång med Steg 1' : plan === 'steg2' ? 'Kom igång med Steg 2' : 'Kom igång med Steg 3';
+  }
+}
+</script>
+</body>
+</html>
