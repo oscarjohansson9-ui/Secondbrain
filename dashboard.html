@@ -197,8 +197,12 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth-guard.js"></script>
 <script>
+const _sb = window.supabase.createClient(
+  "https://nbtvsojkkrfamvfnddoc.supabase.co",
+  "sb_publishable_0BxO282ZNBxUD1bf-UTaUg_jRqKAswX"
+);
+
 async function initDashboard() {
   // Visa success-banner om man kom från betalning
   const urlParams = new URLSearchParams(window.location.search);
@@ -207,10 +211,8 @@ async function initDashboard() {
     window.history.replaceState({}, '', 'dashboard.html');
   }
 
-  // Vänta på auth-guard
-  await new Promise(r => setTimeout(r, 800));
-
   const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
   if (!session) return;
 
   // Refresha session för att få uppdaterad plan från webhook
