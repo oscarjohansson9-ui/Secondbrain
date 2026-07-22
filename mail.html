@@ -90,8 +90,13 @@
   .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
 
   .result-box { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px; font-size:0.88rem; line-height:1.75; color:var(--text); margin-top:14px; white-space:pre-wrap; }
-  .copy-btn { background:none; border:1px solid var(--border); color:var(--text-secondary); font-family:var(--mono); font-size:0.72rem; padding:5px 12px; border-radius:6px; cursor:pointer; margin-top:10px; transition:all 0.2s; }
+  .copy-btn { background:none; border:1px solid var(--border); color:var(--text-secondary); font-family:var(--mono); font-size:0.72rem; padding:5px 12px; border-radius:6px; cursor:pointer; transition:all 0.2s; }
   .copy-btn:hover { color:var(--text); border-color:var(--coral); }
+  .send-btn { background:var(--coral); color:#1A1210; border:none; border-radius:6px; padding:6px 16px; font-size:0.82rem; font-weight:700; cursor:pointer; font-family:var(--sans); transition:all 0.2s; }
+  .send-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(255,139,94,0.4); }
+  .send-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+  .result-box[contenteditable="true"] { outline:none; cursor:text; }
+  .result-box[contenteditable="true"]:focus { border-color:var(--coral); box-shadow:0 0 0 3px var(--coral-glow); }
 
   /* MANUAL MODE */
   .manual-card { padding:20px; }
@@ -168,8 +173,12 @@
             </select>
             <button class="btn-primary" id="gen-btn" onclick="generateReply()">⚡ Generera svar</button>
             <div id="reply-result" style="display:none">
-              <div class="result-box" id="reply-content"></div>
-              <button class="copy-btn" onclick="copyReply()">Kopiera svar</button>
+              <div class="result-box" id="reply-content" contenteditable="true"></div>
+              <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="copy-btn" onclick="copyReply()">Kopiera</button>
+                <button class="send-btn" id="send-btn" onclick="sendReply()">📤 Skicka från Gmail</button>
+              </div>
+              <div id="send-status" style="display:none; margin-top:8px; font-size:0.82rem;"></div>
             </div>
           </div>
         </div>
@@ -384,7 +393,54 @@ async function generateManualReply2() {
   finally { btn.disabled = false; btn.textContent = '⚡ Generera svar'; }
 }
 
-function copyReply() { navigator.clipboard.writeText(document.getElementById('reply-content').textContent).then(() => { const b = document.querySelectorAll('.copy-btn')[0]; b.textContent = '✓ Kopierat!'; setTimeout(() => b.textContent = 'Kopiera svar', 2000); }); }
+function copyReply() { navigator.clipboard.writeText(document.getElementById('reply-content').textContent).then(() => { const b = document.querySelectorAll('.copy-btn')[0]; b.textContent = '✓ Kopierat!'; setTimeout(() => b.textContent = 'Kopiera', 2000); }); }
+
+async function sendReply() {
+  if (!selectedEmail || !currentUserId) return;
+  const message = document.getElementById('reply-content').textContent.trim();
+  if (!message) { alert('Inget svar att skicka!'); return; }
+
+  const btn = document.getElementById('send-btn');
+  const status = document.getElementById('send-status');
+  btn.disabled = true; btn.textContent = 'Skickar...';
+
+  try {
+    const res = await fetch('/api/gmail-send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: currentUserId,
+        to: selectedEmail.from,
+        subject: selectedEmail.subject,
+        message: message,
+        threadId: selectedEmail.threadId,
+        messageId: selectedEmail.messageId
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      status.style.display = 'block';
+      status.style.color = 'var(--success)';
+      status.textContent = '✅ Svaret skickades från din Gmail!';
+      btn.textContent = '✓ Skickat!';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = '📤 Skicka från Gmail';
+        status.style.display = 'none';
+      }, 3000);
+    } else {
+      throw new Error(data.error || 'Kunde inte skicka');
+    }
+  } catch(err) {
+    status.style.display = 'block';
+    status.style.color = 'var(--danger)';
+    status.textContent = '⚠️ Fel: ' + err.message;
+    btn.disabled = false;
+    btn.textContent = '📤 Skicka från Gmail';
+  }
+}
 function copyManual() { navigator.clipboard.writeText(document.getElementById('manual-content').textContent).then(() => { const b = document.querySelectorAll('.copy-btn')[1]; b.textContent = '✓ Kopierat!'; setTimeout(() => b.textContent = 'Kopiera svar', 2000); }); }
 function copyManual2() { navigator.clipboard.writeText(document.getElementById('manual-content2').textContent).then(() => { const b = document.querySelector('.copy-btn'); b.textContent = '✓ Kopierat!'; setTimeout(() => b.textContent = 'Kopiera svar', 2000); }); }
 
