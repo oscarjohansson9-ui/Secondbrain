@@ -6,9 +6,11 @@ export default async function handler(req, res) {
 
   let body = req.body;
   if (typeof body === 'string') body = JSON.parse(body);
-  const { userId, maxResults = 10 } = body || {};
+  const { userId, to, subject, message, threadId, messageId } = body || {};
 
-  if (!userId) return res.status(400).json({ error: 'Saknar userId' });
+  if (!userId || !to || !message) {
+    return res.status(400).json({ error: 'Saknar userId, to eller message' });
+  }
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -28,8 +30,9 @@ export default async function handler(req, res) {
     if (!tokens.length) return res.status(404).json({ error: 'Gmail ej ansluten' });
 
     let accessToken = tokens[0].access_token;
+    const fromEmail = tokens[0].email;
 
-    // Kolla om token har gått ut och refresha
+    // Refresha token om den gått ut
     if (new Date(tokens[0].expires_at) < new Date()) {
       const refreshRes = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -44,7 +47,6 @@ export default async function handler(req, res) {
       const refreshed = await refreshRes.json();
       accessToken = refreshed.access_token;
 
-      // Uppdatera token i Supabase
       await fetch(`${SUPABASE_URL}/rest/v1/gmail_tokens?user_id=eq.${userId}`, {
         method: 'PATCH',
         headers: {
@@ -59,52 +61,49 @@ export default async function handler(req, res) {
       });
     }
 
-    // Hämta senaste mail från Gmail
-    const listRes = await fetch(
-      `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=${maxResults}&labelIds=INBOX&q=is:unread`,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-    const list = await listRes.json();
+    // Bygg email i RFC 2822-format
+    const replySubject = subject?.startsWith('Re:') ? subject : `Re: ${subject || ''}`;
+    const emailLines = [
+      `From: ${fromEmail}`,
+      `To: ${to}`,
+      `Subject: ${replySubject}`,
+      'Content-Type: text/plain; charset=utf-8',
+      'MIME-Version: 1.0',
+    ];
 
-    if (!list.messages) return res.status(200).json({ emails: [] });
+    // Lägg till thread-headers om det är ett svar
+    if (messageId) emailLines.push(`In-Reply-To: ${messageId}`);
+    if (messageId) emailLines.push(`References: ${messageId}`);
 
-    // Hämta detaljer för varje mail
-    const emails = await Promise.all(
-      list.messages.slice(0, 5).map(async (msg) => {
-        const msgRes = await fetch(
-          `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=full`,
-          { headers: { Authorization: `Bearer ${accessToken}` } }
-        );
-        const msgData = await msgRes.json();
-        
-        const headers = msgData.payload.headers;
-        const subject = headers.find(h => h.name === 'Subject')?.value || '(Inget ämne)';
-        const from = headers.find(h => h.name === 'From')?.value || '';
-        const date = headers.find(h => h.name === 'Date')?.value || '';
-        
-        // Hämta textinnehåll
-        let body = '';
-        if (msgData.payload.parts) {
-          const textPart = msgData.payload.parts.find(p => p.mimeType === 'text/plain');
-          if (textPart?.body?.data) {
-            body = Buffer.from(textPart.body.data, 'base64').toString('utf-8');
-          }
-        } else if (msgData.payload.body?.data) {
-          body = Buffer.from(msgData.payload.body.data, 'base64').toString('utf-8');
-        }
+    emailLines.push('', message);
 
-        const messageIdHeader = headers.find(h => h.name === 'Message-ID')?.value || '';
-        return { 
-          id: msg.id, 
-          threadId: msgData.threadId,
-          messageId: messageIdHeader,
-          subject, from, date, 
-          body: body.slice(0, 1000) 
-        };
-      })
+    const rawEmail = emailLines.join('\r\n');
+    const encodedEmail = Buffer.from(rawEmail).toString('base64')
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+    // Skicka via Gmail API
+    const sendBody = { raw: encodedEmail };
+    if (threadId) sendBody.threadId = threadId;
+
+    const sendRes = await fetch(
+      'https://gmail.googleapis.com/gmail/v1/users/me/messages/send',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(sendBody)
+      }
     );
 
-    res.status(200).json({ emails, gmailEmail: tokens[0].email });
+    const sendData = await sendRes.json();
+
+    if (!sendRes.ok) {
+      return res.status(400).json({ error: sendData.error?.message || 'Kunde inte skicka mail' });
+    }
+
+    res.status(200).json({ success: true, messageId: sendData.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
