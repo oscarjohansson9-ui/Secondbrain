@@ -8,15 +8,15 @@
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
 
   :root {
-    --bg: #0A0A0F;
-    --surface: #12121A;
-    --surface2: #1A1A26;
-    --border: #252535;
+    --bg: #111214;
+    --surface: #1C1E22;
+    --surface2: #26292F;
+    --border: #353A42;
     --accent: #6C47FF;
     --accent-soft: #8B6BFF;
     --accent-glow: rgba(108,71,255,0.18);
-    --text: #F0EFF8;
-    --muted: #7A798A;
+    --text: #F0F0F2;
+    --muted: #8A8F9A;
     --success: #3ECBA5;
     --warning: #FFB347;
     --danger: #FF6B6B;
@@ -246,9 +246,9 @@
 <body>
 
 <nav>
-  <div class="logo">second<span>brain</span>.ai</div>
+  <div class="logo">on<span>brain</span></div>
   <div class="nav-links">
-    <a href="index.html" class="nav-link">🧠 AI-analys</a>
+    <a href="dashboard.html" class="nav-link">← Dashboard</a>
     <a href="service.html" class="nav-link active">🔧 Servicehantering</a>
     <a href="mail.html" class="nav-link">✉️ AI-mail</a>
   </div>
@@ -568,7 +568,5 @@ document.getElementById('modal').addEventListener('click', function(e) {
 renderTable();
 updateStats();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth-guard.js"></script>
 </body>
 </html>

@@ -7,61 +7,155 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
   :root {
-    --bg:#0E0D0F; --surface:#1B181C; --surface2:#221F23; --border:#2E2A2F;
-    --coral:#FF8B5E; --coral-soft:#FFB088; --coral-glow:rgba(255,139,94,0.16);
-    --text:#F4EFE9; --muted:#9A8F88; --sand:#E8DFD4;
-    --serif:'Fraunces',serif; --sans:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+    --bg: #111214;
+    --surface: #1C1E22;
+    --surface2: #26292F;
+    --border: #353A42;
+    --coral: #FF8B5E;
+    --coral-soft: #FFB088;
+    --coral-glow: rgba(255,139,94,0.15);
+    --text: #F0F0F2;
+    --text-secondary: #B8BBC2;
+    --muted: #7A7F8A;
+    --success: #4ADE80;
+    --serif: 'Fraunces', serif;
+    --sans: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; }
-  nav { background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; display:flex; align-items:center; justify-content:space-between; height:56px; }
-  .brand { font-family:var(--serif); font-size:1.1rem; font-weight:500; }
+
+  /* NAV */
+  nav {
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    padding:0 32px;
+    display:flex; align-items:center; justify-content:space-between;
+    height:60px;
+  }
+  .brand { font-family:var(--serif); font-size:1.15rem; font-weight:500; color:var(--text); }
   .brand em { font-style:normal; color:var(--coral); }
-  .nav-right { display:flex; align-items:center; gap:12px; }
-  .company { font-family:var(--mono); font-size:0.75rem; color:var(--muted); }
-  .plan-badge { font-family:var(--mono); font-size:0.65rem; color:var(--coral-soft); background:var(--coral-glow); border:1px solid rgba(255,139,94,0.25); padding:3px 10px; border-radius:100px; text-transform:uppercase; }
-  .logout { background:var(--surface2); border:1px solid var(--border); color:var(--muted); font-size:0.78rem; padding:6px 14px; border-radius:8px; cursor:pointer; font-family:var(--sans); transition:all 0.2s; }
-  .logout:hover { color:var(--text); }
+  .nav-right { display:flex; align-items:center; gap:14px; }
+  .company { font-family:var(--mono); font-size:0.78rem; color:var(--text-secondary); }
+  .plan-badge {
+    font-family:var(--mono); font-size:0.68rem; font-weight:500;
+    color:var(--coral); background:var(--coral-glow);
+    border:1px solid rgba(255,139,94,0.35);
+    padding:4px 12px; border-radius:100px; text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .logout {
+    background:var(--surface2); border:1px solid var(--border);
+    color:var(--text-secondary); font-size:0.82rem; padding:7px 16px;
+    border-radius:8px; cursor:pointer; font-family:var(--sans);
+    transition:all 0.2s;
+  }
+  .logout:hover { color:var(--text); border-color:var(--coral); }
+
+  /* PAGE */
   .page { max-width:960px; margin:0 auto; padding:44px 24px; }
-  .welcome { margin-bottom:32px; }
-  .welcome h1 { font-family:var(--serif); font-size:1.8rem; font-weight:500; margin-bottom:6px; }
+
+  /* WELCOME */
+  .welcome { margin-bottom:36px; }
+  .welcome h1 { font-family:var(--serif); font-size:2rem; font-weight:500; margin-bottom:6px; color:var(--text); }
   .welcome h1 em { font-style:italic; color:var(--coral); }
-  .welcome p { color:var(--muted); font-size:0.9rem; }
+  .welcome p { color:var(--text-secondary); font-size:0.92rem; }
 
-  /* Payment success banner */
-  .success-banner { background:rgba(62,203,165,0.08); border:1px solid rgba(62,203,165,0.25); border-radius:12px; padding:14px 20px; margin-bottom:28px; font-size:0.88rem; color:#3ECBA5; display:none; text-align:center; }
+  /* SUCCESS BANNER */
+  .success-banner {
+    background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.3);
+    border-radius:12px; padding:14px 20px; margin-bottom:28px;
+    font-size:0.9rem; color:var(--success); display:none; text-align:center;
+    font-weight:500;
+  }
 
-  /* Service always included */
-  .service-banner { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 24px; margin-bottom:28px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-  .service-left { display:flex; align-items:center; gap:14px; }
-  .service-icon { font-size:1.4rem; }
-  .service-text h3 { font-size:0.92rem; font-weight:600; margin-bottom:3px; }
-  .service-text p { font-size:0.8rem; color:var(--muted); }
-  .service-btn { background:var(--coral); color:#1A1210; border:none; border-radius:100px; padding:8px 20px; font-size:0.82rem; font-weight:700; cursor:pointer; font-family:var(--sans); transition:all 0.2s; text-decoration:none; display:inline-block; }
-  .service-btn:hover { transform:translateY(-1px); }
-  .always-tag { font-family:var(--mono); font-size:0.65rem; color:#3ECBA5; background:rgba(62,203,165,0.1); border:1px solid rgba(62,203,165,0.25); padding:3px 10px; border-radius:100px; }
+  /* SERVICE ALWAYS INCLUDED */
+  .service-banner {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:14px; padding:20px 24px; margin-bottom:32px;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+  .service-left { display:flex; align-items:center; gap:16px; }
+  .service-icon {
+    width:44px; height:44px; background:var(--coral-glow); border-radius:12px;
+    display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;
+  }
+  .service-text h3 { font-size:0.95rem; font-weight:600; color:var(--text); margin-bottom:3px; }
+  .service-text p { font-size:0.82rem; color:var(--text-secondary); }
+  .service-actions { display:flex; align-items:center; gap:10px; }
+  .always-tag {
+    font-family:var(--mono); font-size:0.68rem; color:var(--success);
+    background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3);
+    padding:4px 12px; border-radius:100px; white-space:nowrap;
+  }
+  .service-btn {
+    background:var(--coral); color:#1A1210; border:none; border-radius:100px;
+    padding:9px 22px; font-size:0.84rem; font-weight:700; cursor:pointer;
+    font-family:var(--sans); transition:all 0.2s; text-decoration:none; display:inline-block;
+    white-space:nowrap;
+  }
+  .service-btn:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(255,139,94,0.4); }
 
-  .section-label { font-family:var(--mono); font-size:0.7rem; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:14px; margin-top:28px; }
+  /* SECTION LABEL */
+  .section-label {
+    font-family:var(--mono); font-size:0.72rem; color:var(--muted);
+    letter-spacing:0.1em; text-transform:uppercase; margin-bottom:14px; margin-top:28px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* MODULE GRID */
   .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
   @media(max-width:640px) { .grid { grid-template-columns:1fr; } }
 
-  .module { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:28px; text-decoration:none; color:var(--text); transition:all 0.25s; position:relative; display:block; }
-  .module:hover { border-color:var(--coral); transform:translateY(-2px); box-shadow:0 12px 40px rgba(0,0,0,0.3); }
-  .module.locked { pointer-events:none; }
-  .module-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; }
-  .module-icon { width:46px; height:46px; background:var(--coral-glow); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
-  .step-tag { font-family:var(--mono); font-size:0.65rem; letter-spacing:0.06em; padding:4px 10px; border-radius:100px; }
-  .tag-active { background:rgba(255,139,94,0.12); color:var(--coral-soft); border:1px solid rgba(255,139,94,0.25); }
-  .tag-locked { background:rgba(255,255,255,0.05); color:var(--muted); border:1px solid var(--border); }
-  .module h2 { font-size:1rem; font-weight:600; margin-bottom:6px; }
-  .module p { font-size:0.83rem; color:var(--muted); line-height:1.55; }
-  .lock-overlay { position:absolute; inset:0; background:rgba(14,13,15,0.75); border-radius:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
-  .lock-icon { font-size:1.3rem; }
-  .lock-text { font-size:0.78rem; color:var(--muted); }
-  .upgrade-btn { background:var(--coral); color:#1A1210; border:none; border-radius:100px; padding:7px 18px; font-size:0.78rem; font-weight:700; cursor:pointer; font-family:var(--sans); pointer-events:all; transition:all 0.2s; text-decoration:none; display:inline-block; }
-  .upgrade-btn:hover { transform:translateY(-1px); }
+  /* MODULE CARD */
+  .module {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:16px; padding:28px; text-decoration:none; color:var(--text);
+    transition:all 0.2s; position:relative; display:block;
+  }
+  .module:hover { border-color:var(--coral); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,0.4); }
 
-  .loading-screen { display:flex; align-items:center; justify-content:center; min-height:60vh; color:var(--muted); font-family:var(--mono); font-size:0.85rem; }
+  .module-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; }
+  .module-icon {
+    width:48px; height:48px; background:var(--coral-glow); border-radius:12px;
+    display:flex; align-items:center; justify-content:center; font-size:1.4rem;
+  }
+  .step-tag {
+    font-family:var(--mono); font-size:0.68rem; letter-spacing:0.06em;
+    padding:5px 12px; border-radius:100px; font-weight:500;
+  }
+  .tag-active {
+    background:rgba(255,139,94,0.15); color:var(--coral);
+    border:1px solid rgba(255,139,94,0.35);
+  }
+  .tag-locked {
+    background:rgba(255,255,255,0.05); color:var(--muted);
+    border:1px solid var(--border);
+  }
+  .module h2 { font-size:1.05rem; font-weight:600; margin-bottom:8px; color:var(--text); }
+  .module p { font-size:0.85rem; color:var(--text-secondary); line-height:1.6; }
+
+  /* LOCK OVERLAY */
+  .module-locked {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:16px; padding:28px; position:relative; overflow:hidden;
+  }
+  .module-locked h2 { font-size:1.05rem; font-weight:600; margin-bottom:8px; color:var(--muted); }
+  .module-locked p { font-size:0.85rem; color:var(--muted); line-height:1.6; }
+  .lock-overlay {
+    position:absolute; inset:0; background:rgba(17,18,20,0.82);
+    border-radius:16px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:10px;
+    backdrop-filter:blur(2px);
+  }
+  .lock-icon { font-size:1.6rem; }
+  .lock-text { font-size:0.82rem; color:var(--text-secondary); font-weight:500; }
+  .upgrade-btn {
+    background:var(--coral); color:#1A1210; border:none; border-radius:100px;
+    padding:9px 22px; font-size:0.82rem; font-weight:700; cursor:pointer;
+    font-family:var(--sans); transition:all 0.2s; text-decoration:none; display:inline-block;
+  }
+  .upgrade-btn:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(255,139,94,0.4); }
 </style>
 </head>
 <body>
@@ -90,18 +184,16 @@
       <div class="service-icon">🔧</div>
       <div class="service-text">
         <h3>Servicehantering & påminnelser</h3>
-        <p>Ingår alltid — registrera installationer och låt systemet påminna automatiskt</p>
+        <p>Registrera installationer — påminnelser om service skickas automatiskt</p>
       </div>
     </div>
-    <div style="display:flex; align-items:center; gap:10px;">
+    <div class="service-actions">
       <span class="always-tag">✓ Alltid inkluderat</span>
       <a href="service.html" class="service-btn">Öppna →</a>
     </div>
   </div>
 
-  <div id="modules-container">
-    <div class="loading-screen">Laddar dina moduler...</div>
-  </div>
+  <div id="modules-container"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -112,18 +204,16 @@ async function initDashboard() {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('payment') === 'success') {
     document.getElementById('success-banner').style.display = 'block';
-    // Rensa URL utan att ladda om sidan
     window.history.replaceState({}, '', 'dashboard.html');
   }
 
   // Vänta på auth-guard
   await new Promise(r => setTimeout(r, 800));
 
-  // Hämta färsk session
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) return;
 
-  // Forcera refresh av session för att få uppdaterad plan
+  // Refresha session för att få uppdaterad plan från webhook
   const { data: refreshData } = await _sb.auth.refreshSession();
   const user = refreshData?.session?.user || session.user;
 
@@ -133,20 +223,15 @@ async function initDashboard() {
 
   document.getElementById('welcome-name').textContent = firstName;
   document.getElementById('company-name').textContent = company;
+  document.getElementById('welcome-sub').textContent = `Aktiv plan: ${getPlanLabel(plan)}`;
 
-  const planLabels = {
-    steg1: 'Steg 1', steg2: 'Steg 2', steg3: 'Steg 3',
-    pro: 'Steg 1', enterprise: 'Steg 3', free: 'Gratis'
-  };
+  const planLabels = { steg1:'Steg 1', steg2:'Steg 2', steg3:'Steg 3', pro:'Steg 1', enterprise:'Steg 3', free:'Gratis' };
   document.getElementById('plan-badge').textContent = planLabels[plan] || 'Steg 1';
 
-  const hasSteg1 = true;
-  const hasSteg2 = ['steg2', 'steg3', 'enterprise'].includes(plan);
+  const hasSteg2 = ['steg2','steg3','enterprise'].includes(plan);
   const hasSteg3 = ['steg3'].includes(plan);
 
-  const container = document.getElementById('modules-container');
-
-  container.innerHTML = `
+  document.getElementById('modules-container').innerHTML = `
     <div class="section-label">Steg 1 — Offertgenerator</div>
     <div class="grid">
       <a href="offert.html" class="module">
@@ -155,66 +240,69 @@ async function initDashboard() {
           <span class="step-tag tag-active">STEG 1</span>
         </div>
         <h2>Offertgenerator</h2>
-        <p>Ladda upp er prislista och en bild av jobbet. AI skriver en komplett offert med priser direkt.</p>
+        <p>Ladda upp er prislista och en bild. AI skriver en komplett offert med priser på sekunder.</p>
       </a>
     </div>
 
     <div class="section-label">Steg 2 — AI-mailassistent</div>
     <div class="grid">
-      ${hasSteg2 ? `
-        <a href="mail.html" class="module">
-          <div class="module-top">
-            <div class="module-icon">✉️</div>
-            <span class="step-tag tag-active">STEG 2</span>
-          </div>
-          <h2>AI-mailassistent</h2>
-          <p>Klistra in ett inkommet mail — få ett färdigt professionellt svarsutkast på sekunder.</p>
-        </a>
-      ` : `
-        <div class="module locked">
-          <div class="module-top">
-            <div class="module-icon">✉️</div>
-            <span class="step-tag tag-locked">STEG 2</span>
-          </div>
-          <h2>AI-mailassistent</h2>
-          <p>Klistra in ett inkommet mail — få ett färdigt professionellt svarsutkast på sekunder.</p>
-          <div class="lock-overlay">
-            <div class="lock-icon">🔒</div>
-            <div class="lock-text">Kräver Steg 2 (2 500 kr/mån)</div>
-            <a href="pricing.html" class="upgrade-btn">Uppgradera →</a>
-          </div>
-        </div>
-      `}
+      ${hasSteg2
+        ? `<a href="mail.html" class="module">
+            <div class="module-top">
+              <div class="module-icon">✉️</div>
+              <span class="step-tag tag-active">STEG 2</span>
+            </div>
+            <h2>AI-mailassistent</h2>
+            <p>Klistra in ett inkommet mail — få ett färdigt professionellt svarsutkast på sekunder.</p>
+          </a>`
+        : `<div class="module-locked">
+            <div class="module-top">
+              <div class="module-icon" style="opacity:0.4">✉️</div>
+              <span class="step-tag tag-locked">STEG 2</span>
+            </div>
+            <h2>AI-mailassistent</h2>
+            <p>Klistra in ett inkommet mail — få ett färdigt professionellt svarsutkast på sekunder.</p>
+            <div class="lock-overlay">
+              <div class="lock-icon">🔒</div>
+              <div class="lock-text">Kräver Steg 2 — 2 500 kr/mån</div>
+              <a href="pricing.html" class="upgrade-btn">Uppgradera →</a>
+            </div>
+          </div>`
+      }
     </div>
 
     <div class="section-label">Steg 3 — Arbetsorder</div>
     <div class="grid">
-      ${hasSteg3 ? `
-        <a href="ao.html" class="module">
-          <div class="module-top">
-            <div class="module-icon">📝</div>
-            <span class="step-tag tag-active">STEG 3</span>
-          </div>
-          <h2>Arbetsorder</h2>
-          <p>Skapa arbetsorder automatiskt och skicka direkt till ert ordersystem.</p>
-        </a>
-      ` : `
-        <div class="module locked">
-          <div class="module-top">
-            <div class="module-icon">📝</div>
-            <span class="step-tag tag-locked">STEG 3</span>
-          </div>
-          <h2>Arbetsorder</h2>
-          <p>Skapa arbetsorder automatiskt och skicka direkt till ert ordersystem (Mowin m.fl.).</p>
-          <div class="lock-overlay">
-            <div class="lock-icon">🔒</div>
-            <div class="lock-text">Kräver Steg 3 (5 000 kr/mån)</div>
-            <a href="pricing.html" class="upgrade-btn">Uppgradera →</a>
-          </div>
-        </div>
-      `}
+      ${hasSteg3
+        ? `<a href="ao.html" class="module">
+            <div class="module-top">
+              <div class="module-icon">📝</div>
+              <span class="step-tag tag-active">STEG 3</span>
+            </div>
+            <h2>Arbetsorder</h2>
+            <p>Skapa arbetsorder automatiskt och skicka direkt till ert ordersystem.</p>
+          </a>`
+        : `<div class="module-locked">
+            <div class="module-top">
+              <div class="module-icon" style="opacity:0.4">📝</div>
+              <span class="step-tag tag-locked">STEG 3</span>
+            </div>
+            <h2>Arbetsorder</h2>
+            <p>Skapa arbetsorder automatiskt och skicka direkt till ert ordersystem (Mowin m.fl.).</p>
+            <div class="lock-overlay">
+              <div class="lock-icon">🔒</div>
+              <div class="lock-text">Kräver Steg 3 — 5 000 kr/mån</div>
+              <a href="pricing.html" class="upgrade-btn">Uppgradera →</a>
+            </div>
+          </div>`
+      }
     </div>
   `;
+}
+
+function getPlanLabel(plan) {
+  const labels = { steg1:'Steg 1 — Offert & Service', steg2:'Steg 2 — + AI-mail', steg3:'Steg 3 — + Arbetsorder', pro:'Steg 1', enterprise:'Steg 3', free:'Gratis' };
+  return labels[plan] || 'Steg 1';
 }
 
 async function doLogout() {
