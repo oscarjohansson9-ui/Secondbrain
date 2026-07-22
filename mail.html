@@ -3,172 +3,392 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SecondBrain — AI Mailassistent</title>
+<title>OnBrain — AI-mailassistent</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
   :root {
-    --bg: #111214; --surface: #1C1E22; --surface2: #26292F;
-    --border: #353A42; --accent: #6C47FF; --accent-soft: #8B6BFF;
-    --accent-glow: rgba(108,71,255,0.18); --text: #F0F0F2;
-    --muted: #8A8F9A; --success: #3ECBA5;
-    --mono: 'JetBrains Mono', monospace; --sans: 'Inter', sans-serif;
+    --bg:#111214; --surface:#1E2126; --surface2:#272B33; --border:#3A3F4A;
+    --coral:#FF8B5E; --coral-soft:#FFB088; --coral-glow:rgba(255,139,94,0.15);
+    --text:#EDEEF0; --text-secondary:#B0B5C0; --muted:#72788A;
+    --success:#4ADE80; --danger:#F87171;
+    --serif:'Fraunces',serif; --sans:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
-  nav {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 0 32px; display: flex; align-items: center; gap: 32px; height: 56px;
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; }
+
+  nav { background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; display:flex; align-items:center; gap:24px; height:60px; }
+  .brand { font-family:var(--serif); font-weight:500; font-size:1.1rem; color:var(--text); }
+  .brand em { font-style:normal; color:var(--coral); }
+  .nav-links { display:flex; gap:4px; }
+  .nav-link { padding:6px 14px; border-radius:8px; font-size:0.85rem; color:var(--text-secondary); text-decoration:none; transition:all 0.2s; font-weight:500; }
+  .nav-link:hover, .nav-link.active { color:var(--text); background:var(--surface2); }
+
+  .page { max-width:1000px; margin:0 auto; padding:36px 24px; }
+  .page-header { margin-bottom:28px; }
+  .page-header h1 { font-size:1.5rem; font-weight:700; color:var(--text); }
+  .page-header p { color:var(--text-secondary); font-size:0.9rem; margin-top:4px; }
+
+  /* GMAIL CONNECT BANNER */
+  .connect-banner {
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:32px; text-align:center; margin-bottom:28px;
   }
-  .logo { font-family: var(--mono); font-weight: 600; font-size: 0.95rem; }
-  .logo span { color: var(--accent); }
-  .nav-links { display: flex; gap: 4px; }
-  .nav-link { padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; color: var(--muted); text-decoration: none; transition: all 0.2s; }
-  .nav-link:hover, .nav-link.active { color: var(--text); background: var(--surface2); }
-  .page { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
-  .page-header { margin-bottom: 28px; }
-  .page-header h1 { font-size: 1.4rem; font-weight: 600; }
-  .page-header p { color: var(--muted); font-size: 0.88rem; margin-top: 4px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
-  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); }
-  .card-header h2 { font-size: 0.9rem; font-weight: 600; }
-  .card-body { padding: 20px; }
-  label { display: block; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
-  textarea, select {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 10px; color: var(--text); font-family: var(--sans);
-    font-size: 0.88rem; padding: 12px 14px; outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s; resize: none;
+  .connect-banner h2 { font-family:var(--serif); font-size:1.3rem; margin-bottom:8px; }
+  .connect-banner p { color:var(--text-secondary); font-size:0.9rem; margin-bottom:24px; line-height:1.6; }
+  .gmail-btn {
+    display:inline-flex; align-items:center; gap:10px;
+    background:#fff; color:#1a1a1a; border:none; border-radius:10px;
+    padding:13px 24px; font-size:0.92rem; font-weight:600; cursor:pointer;
+    font-family:var(--sans); transition:all 0.2s; box-shadow:0 2px 8px rgba(0,0,0,0.3);
   }
-  textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-  .btn-primary {
-    width: 100%; background: var(--accent); color: #fff; border: none;
-    border-radius: 10px; padding: 14px; font-size: 0.9rem; font-weight: 600;
-    font-family: var(--sans); cursor: pointer; margin-top: 12px;
-    transition: all 0.2s; box-shadow: 0 4px 16px rgba(108,71,255,0.3);
+  .gmail-btn:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,0.4); }
+  .gmail-btn img { width:20px; height:20px; }
+
+  .connected-badge {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3);
+    color:var(--success); border-radius:100px; padding:8px 18px;
+    font-size:0.85rem; font-weight:500; margin-bottom:20px;
   }
-  .btn-primary:hover:not(:disabled) { background: var(--accent-soft); transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .result-box {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 16px; font-size: 0.88rem;
-    line-height: 1.7; min-height: 200px; white-space: pre-wrap;
-    color: var(--text);
+
+  /* INBOX */
+  .inbox-grid { display:grid; grid-template-columns:1fr 1.5fr; gap:20px; }
+  @media(max-width:800px) { .inbox-grid { grid-template-columns:1fr; } }
+
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+  .card-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .card-header h2 { font-size:0.95rem; font-weight:600; color:var(--text); }
+  .card-body { padding:0; }
+
+  /* EMAIL LIST */
+  .email-item {
+    padding:16px 20px; border-bottom:1px solid rgba(58,63,74,0.5);
+    cursor:pointer; transition:background 0.15s;
   }
-  .copy-btn {
-    background: none; border: 1px solid var(--border); color: var(--muted);
-    font-family: var(--mono); font-size: 0.7rem; padding: 5px 12px;
-    border-radius: 6px; cursor: pointer; margin-top: 10px; transition: all 0.2s;
-  }
-  .copy-btn:hover { color: var(--text); border-color: var(--accent); }
-  .thinking { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; padding: 20px; text-align: center; }
-  .form-group { margin-bottom: 14px; }
-  select { appearance: none; cursor: pointer; }
+  .email-item:last-child { border-bottom:none; }
+  .email-item:hover { background:rgba(255,255,255,0.03); }
+  .email-item.selected { background:var(--coral-glow); border-left:3px solid var(--coral); }
+  .email-from { font-size:0.85rem; font-weight:600; color:var(--text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .email-subject { font-size:0.82rem; color:var(--text-secondary); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .email-date { font-family:var(--mono); font-size:0.72rem; color:var(--muted); }
+  .email-empty { padding:32px; text-align:center; color:var(--muted); font-size:0.88rem; }
+
+  /* AI REPLY */
+  .reply-panel { padding:20px; }
+  .selected-email { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:16px; font-size:0.85rem; color:var(--text-secondary); line-height:1.6; max-height:200px; overflow-y:auto; }
+  .selected-email strong { color:var(--text); display:block; margin-bottom:6px; }
+
+  label { display:block; font-family:var(--mono); font-size:0.72rem; color:var(--text-secondary); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px; }
+  select { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:var(--sans); font-size:0.88rem; padding:10px 14px; outline:none; appearance:none; cursor:pointer; margin-bottom:14px; transition:border-color 0.2s; }
+  select:focus { border-color:var(--coral); }
+  textarea { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:var(--sans); font-size:0.88rem; padding:14px; outline:none; resize:none; min-height:140px; line-height:1.6; transition:border-color 0.2s; margin-bottom:12px; }
+  textarea::placeholder { color:var(--muted); }
+  textarea:focus { border-color:var(--coral); box-shadow:0 0 0 3px var(--coral-glow); }
+
+  .btn-primary { width:100%; background:var(--coral); color:#1A1210; border:none; border-radius:10px; padding:13px; font-size:0.9rem; font-weight:700; font-family:var(--sans); cursor:pointer; transition:all 0.2s; box-shadow:0 3px 12px rgba(255,139,94,0.3); }
+  .btn-primary:hover:not(:disabled) { transform:translateY(-1px); }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+
+  .result-box { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px; font-size:0.88rem; line-height:1.75; color:var(--text); margin-top:14px; white-space:pre-wrap; }
+  .copy-btn { background:none; border:1px solid var(--border); color:var(--text-secondary); font-family:var(--mono); font-size:0.72rem; padding:5px 12px; border-radius:6px; cursor:pointer; margin-top:10px; transition:all 0.2s; }
+  .copy-btn:hover { color:var(--text); border-color:var(--coral); }
+
+  /* MANUAL MODE */
+  .manual-card { padding:20px; }
+  .divider { display:flex; align-items:center; gap:12px; margin:20px 0; color:var(--muted); font-size:0.8rem; }
+  .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .refresh-btn { background:var(--surface2); border:1px solid var(--border); color:var(--text-secondary); font-size:0.8rem; padding:6px 14px; border-radius:8px; cursor:pointer; font-family:var(--sans); transition:all 0.2s; }
+  .refresh-btn:hover { color:var(--text); }
 </style>
 </head>
 <body>
+
 <nav>
-  <div class="logo">on<span>brain</span></div>
+  <div class="brand">on<em>brain</em></div>
   <div class="nav-links">
     <a href="dashboard.html" class="nav-link">← Dashboard</a>
-    <a href="service.html" class="nav-link">🔧 Servicehantering</a>
     <a href="mail.html" class="nav-link active">✉️ AI-mail</a>
   </div>
 </nav>
 
 <div class="page">
   <div class="page-header">
-    <h1>✉️ AI Mailassistent</h1>
-    <p>Klistra in ett inkommet mail — AI skriver ett färdigt svar åt dig</p>
+    <h1>✉️ AI-mailassistent</h1>
+    <p>Anslut er Gmail — AI läser inkorgen och skriver svarsutkast åt er</p>
   </div>
 
-  <div class="grid">
-    <div class="card">
-      <div class="card-header"><h2>Inkommet mail</h2></div>
-      <div class="card-body">
-        <div class="form-group">
-          <label>Ton på svaret</label>
-          <select id="tone">
-            <option value="professionell">Professionell</option>
-            <option value="vänlig">Vänlig & personlig</option>
-            <option value="kort">Kort & koncis</option>
-            <option value="säljande">Säljande</option>
-          </select>
+  <!-- GMAIL CONNECT -->
+  <div id="connect-section">
+    <div class="connect-banner">
+      <h2>Anslut er Gmail-inkorg</h2>
+      <p>Klicka nedan för att ansluta er Gmail. OnBrain läser inkorgen och hjälper er skriva professionella svar på sekunder.</p>
+      <button class="gmail-btn" onclick="connectGmail()">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.27 9.18v5.59l-3.1 2.42V6.81z"/><path fill="#FBBC05" d="M19.16 9.18l3.1-2.37v10.38l-3.1-2.42z"/><path fill="#34A853" d="M5.27 14.77l6.73 5.23 6.73-5.23 3.1 2.42L12 22.14 1.9 17.19z"/><path fill="#EA4335" d="M1.9 6.81L5 9.18l7-5.45 7 5.45 3.1-2.37L12 1.86z"/><path fill="#4285F4" d="M12 3.73L5.27 9.18v5.59L12 20l6.73-5.23V9.18z"/></svg>
+        Anslut Gmail
+      </button>
+    </div>
+  </div>
+
+  <!-- CONNECTED STATE -->
+  <div id="inbox-section" style="display:none">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+      <div class="connected-badge">
+        ✓ Gmail ansluten: <span id="gmail-email"></span>
+      </div>
+      <button class="refresh-btn" onclick="loadEmails()">↻ Uppdatera</button>
+    </div>
+
+    <div class="inbox-grid">
+      <div class="card">
+        <div class="card-header">
+          <h2>📬 Olästa mail</h2>
         </div>
-        <div class="form-group">
-          <label>Mailinnehåll</label>
-          <textarea id="incoming-mail" rows="10" placeholder="Klistra in det inkomna mailet här..."></textarea>
+        <div class="card-body" id="email-list">
+          <div class="email-empty">Laddar mail...</div>
         </div>
-        <div class="form-group">
-          <label>Extra instruktioner (valfritt)</label>
-          <textarea id="extra" rows="2" placeholder="T.ex. nämn att vi har ledig tid tisdag, erbjud 10% rabatt..." style="min-height:60px"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>✍️ AI-svarsutkast</h2>
         </div>
-        <button class="btn-primary" id="gen-btn" onclick="generateReply()">⚡ Generera svar</button>
+        <div class="reply-panel">
+          <div id="no-selected" style="color:var(--muted); font-size:0.88rem; padding:20px 0;">
+            ← Välj ett mail för att generera ett svar
+          </div>
+          <div id="reply-form" style="display:none">
+            <div class="selected-email" id="selected-email-content"></div>
+            <label>Ton på svaret</label>
+            <select id="tone">
+              <option value="professionell">Professionell</option>
+              <option value="vänlig">Vänlig & personlig</option>
+              <option value="kort">Kort & koncis</option>
+              <option value="säljande">Säljande</option>
+            </select>
+            <button class="btn-primary" id="gen-btn" onclick="generateReply()">⚡ Generera svar</button>
+            <div id="reply-result" style="display:none">
+              <div class="result-box" id="reply-content"></div>
+              <button class="copy-btn" onclick="copyReply()">Kopiera svar</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
+    <div class="divider">ELLER KLISTRA IN MANUELLT</div>
+
     <div class="card">
-      <div class="card-header"><h2>Förslag på svar</h2></div>
-      <div class="card-body">
-        <div class="result-box" id="result">Ditt AI-genererade mailsvar visas här...</div>
-        <button class="copy-btn" onclick="copyReply()">Kopiera svar</button>
+      <div class="card-header"><h2>📋 Manuell inmatning</h2></div>
+      <div class="manual-card">
+        <label>Klistra in ett mail</label>
+        <textarea id="manual-mail" placeholder="Klistra in ett inkommet mail här..."></textarea>
+        <label>Ton</label>
+        <select id="manual-tone">
+          <option value="professionell">Professionell</option>
+          <option value="vänlig">Vänlig & personlig</option>
+          <option value="kort">Kort & koncis</option>
+        </select>
+        <button class="btn-primary" id="manual-btn" onclick="generateManualReply()">⚡ Generera svar</button>
+        <div id="manual-result" style="display:none">
+          <div class="result-box" id="manual-content"></div>
+          <button class="copy-btn" onclick="copyManual()">Kopiera svar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANUAL ONLY (ej ansluten) -->
+  <div id="manual-section">
+    <div class="card">
+      <div class="card-header"><h2>📋 Klistra in ett mail manuellt</h2></div>
+      <div class="manual-card">
+        <label>Inkommet mail</label>
+        <textarea id="manual-mail2" placeholder="Klistra in ett inkommet mail här..."></textarea>
+        <label>Ton</label>
+        <select id="manual-tone2">
+          <option value="professionell">Professionell</option>
+          <option value="vänlig">Vänlig & personlig</option>
+          <option value="kort">Kort & koncis</option>
+        </select>
+        <button class="btn-primary" id="manual-btn2" onclick="generateManualReply2()">⚡ Generera svar</button>
+        <div id="manual-result2" style="display:none">
+          <div class="result-box" id="manual-content2"></div>
+          <button class="copy-btn" onclick="copyManual2()">Kopiera svar</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth-guard.js"></script>
 <script>
+const _sbMail = window.supabase.createClient(
+  "https://nbtvsojkkrfamvfnddoc.supabase.co",
+  "sb_publishable_0BxO282ZNBxUD1bf-UTaUg_jRqKAswX"
+);
+
+let currentUserId = null;
+let selectedEmail = null;
+
+// Kolla URL-parametrar
+const params = new URLSearchParams(window.location.search);
+if (params.get('gmail') === 'connected') {
+  const email = params.get('email');
+  showConnected(email);
+  window.history.replaceState({}, '', 'mail.html');
+}
+if (params.get('error')) {
+  alert('Fel vid Gmail-anslutning: ' + params.get('error'));
+}
+
+async function init() {
+  await new Promise(r => setTimeout(r, 600));
+  const { data: { session } } = await _sbMail.auth.getSession();
+  if (!session) return;
+  currentUserId = session.user.id;
+
+  // Kolla om Gmail redan är anslutet
+  try {
+    const res = await fetch('/api/gmail-fetch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: currentUserId, maxResults: 1 })
+    });
+    const data = await res.json();
+    if (data.gmailEmail) {
+      showConnected(data.gmailEmail);
+    }
+  } catch(e) {}
+}
+
+function connectGmail() {
+  if (!currentUserId) { alert('Logga in först!'); return; }
+  window.location.href = `/api/gmail-auth?userId=${currentUserId}`;
+}
+
+function showConnected(email) {
+  document.getElementById('connect-section').style.display = 'none';
+  document.getElementById('manual-section').style.display = 'none';
+  document.getElementById('inbox-section').style.display = 'block';
+  document.getElementById('gmail-email').textContent = email;
+  loadEmails();
+}
+
+async function loadEmails() {
+  if (!currentUserId) return;
+  document.getElementById('email-list').innerHTML = '<div class="email-empty">Hämtar mail...</div>';
+  try {
+    const res = await fetch('/api/gmail-fetch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: currentUserId, maxResults: 10 })
+    });
+    const data = await res.json();
+    if (!data.emails || data.emails.length === 0) {
+      document.getElementById('email-list').innerHTML = '<div class="email-empty">Inga olästa mail 🎉</div>';
+      return;
+    }
+    document.getElementById('email-list').innerHTML = data.emails.map((email, i) => `
+      <div class="email-item" onclick="selectEmail(${i})" id="email-${i}">
+        <div class="email-from">${email.from.split('<')[0].trim()}</div>
+        <div class="email-subject">${email.subject}</div>
+        <div class="email-date">${new Date(email.date).toLocaleDateString('sv-SE')}</div>
+      </div>
+    `).join('');
+    window._emails = data.emails;
+  } catch(e) {
+    document.getElementById('email-list').innerHTML = `<div class="email-empty">Fel: ${e.message}</div>`;
+  }
+}
+
+function selectEmail(index) {
+  selectedEmail = window._emails[index];
+  document.querySelectorAll('.email-item').forEach(el => el.classList.remove('selected'));
+  document.getElementById('email-' + index)?.classList.add('selected');
+  document.getElementById('no-selected').style.display = 'none';
+  document.getElementById('reply-form').style.display = 'block';
+  document.getElementById('reply-result').style.display = 'none';
+  document.getElementById('selected-email-content').innerHTML = `
+    <strong>Från: ${selectedEmail.from}</strong>
+    <strong>Ämne: ${selectedEmail.subject}</strong>
+    ${selectedEmail.body}
+  `;
+}
+
 async function generateReply() {
-  const mail = document.getElementById('incoming-mail').value.trim();
+  if (!selectedEmail) return;
   const tone = document.getElementById('tone').value;
-  const extra = document.getElementById('extra').value.trim();
-  if (!mail) { alert('Klistra in ett mail först!'); return; }
-
   const btn = document.getElementById('gen-btn');
-  btn.disabled = true;
-  btn.textContent = 'Genererar...';
-  document.getElementById('result').innerHTML = '<div class="thinking">AI skriver ditt svar...</div>';
+  btn.disabled = true; btn.textContent = 'Genererar...';
 
-  const prompt = `Du är en professionell assistent för ett hantverksföretag (kan vara t.ex. el, VVS, lås, larm, bygg, ventilation eller liknande bransch).
+  const prompt = `Du är en professionell assistent för ett hantverksföretag.
+Mail från: ${selectedEmail.from}
+Ämne: ${selectedEmail.subject}
+Innehåll: ${selectedEmail.body}
 
-Ett mail har kommit in:
----
-${mail}
----
-
-${extra ? `Extra instruktioner: ${extra}` : ''}
-
-Skriv ett ${tone} svar på svenska. Svaret ska vara redo att skicka direkt utan att behöva redigeras. Inkludera inte ämnesrad. Börja direkt med hälsningsfrasen.`;
+Skriv ett ${tone} svar på svenska. Redo att skicka direkt utan redigering.`;
 
   try {
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await res.json();
-    document.getElementById('result').textContent = data.content?.[0]?.text || 'Inget svar genererades.';
+    document.getElementById('reply-content').textContent = data.content?.[0]?.text || '';
+    document.getElementById('reply-result').style.display = 'block';
   } catch(e) {
-    document.getElementById('result').textContent = 'Fel: ' + e.message;
+    alert('Fel: ' + e.message);
   } finally {
-    btn.disabled = false;
-    btn.textContent = '⚡ Generera svar';
+    btn.disabled = false; btn.textContent = '⚡ Generera svar';
   }
 }
 
-function copyReply() {
-  const text = document.getElementById('result').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.copy-btn');
-    btn.textContent = '✓ Kopierat!';
-    setTimeout(() => btn.textContent = 'Kopiera svar', 2000);
-  });
+async function generateManualReply() {
+  const mail = document.getElementById('manual-mail').value.trim();
+  const tone = document.getElementById('manual-tone').value;
+  if (!mail) { alert('Klistra in ett mail!'); return; }
+  const btn = document.getElementById('manual-btn');
+  btn.disabled = true; btn.textContent = 'Genererar...';
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 800, messages: [{ role: 'user', content: `Du är en professionell assistent för ett hantverksföretag. Skriv ett ${tone} svar på svenska till detta mail:\n\n${mail}` }] })
+    });
+    const data = await res.json();
+    document.getElementById('manual-content').textContent = data.content?.[0]?.text || '';
+    document.getElementById('manual-result').style.display = 'block';
+  } catch(e) { alert('Fel: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = '⚡ Generera svar'; }
 }
+
+async function generateManualReply2() {
+  const mail = document.getElementById('manual-mail2').value.trim();
+  const tone = document.getElementById('manual-tone2').value;
+  if (!mail) { alert('Klistra in ett mail!'); return; }
+  const btn = document.getElementById('manual-btn2');
+  btn.disabled = true; btn.textContent = 'Genererar...';
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 800, messages: [{ role: 'user', content: `Du är en professionell assistent för ett hantverksföretag. Skriv ett ${tone} svar på svenska till detta mail:\n\n${mail}` }] })
+    });
+    const data = await res.json();
+    document.getElementById('manual-content2').textContent = data.content?.[0]?.text || '';
+    document.getElementById('manual-result2').style.display = 'block';
+  } catch(e) { alert('Fel: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = '⚡ Generera svar'; }
+}
+
+function copyReply() { navigator.clipboard.writeText(document.getElementById('reply-content').textContent).then(() => { const b = document.querySelectorAll('.copy-btn')[0]; b.textContent = '✓ Kopierat!'; setTimeout(() => b.textContent = 'Kopiera svar', 2000); }); }
+function copyManual() { navigator.clipboard.writeText(document.getElementById('manual-content').textContent).then(() => { const b = document.querySelectorAll('.copy-btn')[1]; b.textContent = '✓ Kopierat!'; setTimeout(() => b.textContent = 'Kopiera svar', 2000); }); }
+function copyManual2() { navigator.clipboard.writeText(document.getElementById('manual-content2').textContent).then(() => { const b = document.querySelector('.copy-btn'); b.textContent = '✓ Kopierat!'; setTimeout(() => b.textContent = 'Kopiera svar', 2000); }); }
+
+init();
 </script>
 </body>
 </html>
