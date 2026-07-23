@@ -152,16 +152,19 @@ Montagearbete - 650 kr/timme
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth-guard.js"></script>
 <script>
+const _sb = window.supabase.createClient(
+  "https://nbtvsojkkrfamvfnddoc.supabase.co",
+  "sb_publishable_0BxO282ZNBxUD1bf-UTaUg_jRqKAswX"
+);
+
 let uploadedImageBase64 = null;
 let uploadedImageMediaType = null;
 let currentUserId = null;
 
-// Wait for auth-guard to set up user, then load pricelist
 async function initPage() {
-  // Wait for supabase session
   const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
   if (!session) return;
   currentUserId = session.user.id;
   await loadPricelist();

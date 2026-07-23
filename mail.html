@@ -252,6 +252,19 @@
     </div>
     <div class="mail-body" id="detail-body"></div>
 
+    <!-- BILDER I MAILET -->
+    <div id="mail-images" style="display:none; margin-bottom:16px;">
+      <div style="font-family:var(--mono); font-size:0.7rem; color:var(--text-secondary); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:10px;">📎 Bifogade bilder</div>
+      <div id="images-container" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+      <div id="ai-image-analysis" style="display:none; background:rgba(255,139,94,0.08); border:1px solid rgba(255,139,94,0.25); border-radius:10px; padding:14px; margin-top:12px; font-size:0.85rem; line-height:1.6; color:var(--text-secondary);">
+        <div style="font-family:var(--mono); font-size:0.7rem; color:var(--coral-soft); margin-bottom:8px;">🤖 AI-BILDANALYS</div>
+        <div id="image-analysis-text"></div>
+      </div>
+      <button id="analyze-images-btn" onclick="analyzeMailImages()" style="display:none; margin-top:10px; background:var(--surface2); border:1px solid var(--border); color:var(--coral-soft); border-radius:8px; padding:8px 16px; font-size:0.82rem; cursor:pointer; font-family:var(--sans); font-weight:600;">
+        🔍 Analysera bilder med AI
+      </button>
+    </div>
+
     <div class="ai-section">
       <div class="ai-section-header">
         <div class="ai-label">⚡ AI-svarsutkast</div>
@@ -471,6 +484,29 @@ function openEmail(index) {
   document.getElementById('detail-date').textContent = selectedEmail.date ? new Date(selectedEmail.date).toLocaleString('sv-SE') : '';
   document.getElementById('detail-body').textContent = selectedEmail.body || '';
 
+  // Visa bilder om det finns
+  const imagesSection = document.getElementById('mail-images');
+  const imagesContainer = document.getElementById('images-container');
+  const analyzeBtn = document.getElementById('analyze-images-btn');
+  const analysisDiv = document.getElementById('ai-image-analysis');
+
+  if (selectedEmail.images && selectedEmail.images.length > 0) {
+    imagesSection.style.display = 'block';
+    analyzeBtn.style.display = 'inline-block';
+    analysisDiv.style.display = 'none';
+    imagesContainer.innerHTML = selectedEmail.images.map((img, i) => `
+      <div style="position:relative;">
+        <img src="data:${img.mimeType};base64,${img.data}"
+          style="max-width:180px; max-height:180px; border-radius:10px; border:1px solid var(--border); object-fit:cover; cursor:pointer;"
+          onclick="this.style.maxWidth=this.style.maxWidth==='100%'?'180px':'100%'"
+          title="${img.filename}" />
+        <div style="font-size:0.72rem; color:var(--muted); margin-top:4px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${img.filename}</div>
+      </div>
+    `).join('');
+  } else {
+    imagesSection.style.display = 'none';
+  }
+
   // Rensa AI-svar
   document.getElementById('ai-reply').innerHTML = '<span class="ai-reply-placeholder">Klicka "Generera" för att skriva ett AI-svar...</span>';
   document.getElementById('status-msg').className = 'status-msg';
@@ -567,6 +603,52 @@ async function sendReply() {
     status.textContent = '⚠️ Fel: ' + err.message;
     status.className = 'status-msg error';
     btn.disabled = false; btn.textContent = '📤 Skicka svar';
+  }
+}
+
+async function analyzeMailImages() {
+  if (!selectedEmail?.images?.length) return;
+  const btn = document.getElementById('analyze-images-btn');
+  const analysisDiv = document.getElementById('ai-image-analysis');
+  const analysisText = document.getElementById('image-analysis-text');
+
+  btn.textContent = '🔍 Analyserar...';
+  btn.disabled = true;
+
+  // Bygg meddelande med bilder till Claude
+  const content = [
+    ...selectedEmail.images.map(img => ({
+      type: 'image',
+      source: { type: 'base64', media_type: img.mimeType, data: img.data }
+    })),
+    {
+      type: 'text',
+      text: `Analysera dessa bilder från ett inkommet mail. Mailet handlar om: "${selectedEmail.subject}".
+      
+Beskriv:
+1. Vad du ser på bilden/bilderna
+2. Om det verkar vara en skada, problem eller offertförfrågan — beskriv vad som behöver åtgärdas
+3. Om det är ett hantverksjobb — uppskatta typ av arbete och material som kan behövas
+
+Svara kort och konkret på svenska.`
+    }
+  ];
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 600, messages: [{ role: 'user', content }] })
+    });
+    const data = await res.json();
+    analysisText.textContent = data.content?.[0]?.text || '';
+    analysisDiv.style.display = 'block';
+    btn.textContent = '✓ Analyserad';
+  } catch(e) {
+    analysisText.textContent = 'Fel: ' + e.message;
+    analysisDiv.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '🔍 Analysera bilder med AI';
   }
 }
 
