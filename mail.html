@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <title>OnBrain — AI-mailassistent</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -10,334 +10,499 @@
     --bg:#111214; --surface:#1E2126; --surface2:#272B33; --border:#3A3F4A;
     --coral:#FF8B5E; --coral-soft:#FFB088; --coral-glow:rgba(255,139,94,0.15);
     --text:#EDEEF0; --text-secondary:#B0B5C0; --muted:#72788A;
-    --success:#4ADE80; --danger:#F87171;
+    --success:#4ADE80; --danger:#F87171; --warning:#FBBF24;
     --serif:'Fraunces',serif; --sans:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
   }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; overflow-x:hidden; }
 
-  nav { background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; display:flex; align-items:center; gap:24px; height:60px; }
-  .brand { font-family:var(--serif); font-weight:500; font-size:1.1rem; color:var(--text); }
+  /* NAV */
+  .topnav { background:var(--surface); border-bottom:1px solid var(--border); padding:0 16px; display:flex; align-items:center; justify-content:space-between; height:56px; position:sticky; top:0; z-index:100; }
+  .brand { font-family:var(--serif); font-size:1.05rem; font-weight:500; color:var(--text); }
   .brand em { font-style:normal; color:var(--coral); }
-  .nav-links { display:flex; gap:4px; }
-  .nav-link { padding:6px 14px; border-radius:8px; font-size:0.85rem; color:var(--text-secondary); text-decoration:none; transition:all 0.2s; font-weight:500; }
-  .nav-link:hover, .nav-link.active { color:var(--text); background:var(--surface2); }
+  .nav-back { color:var(--text-secondary); text-decoration:none; font-size:0.88rem; display:flex; align-items:center; gap:6px; }
+  .nav-back:hover { color:var(--text); }
 
-  .page { max-width:1000px; margin:0 auto; padding:36px 24px; }
-  .page-header { margin-bottom:28px; }
-  .page-header h1 { font-size:1.5rem; font-weight:700; color:var(--text); }
-  .page-header p { color:var(--text-secondary); font-size:0.9rem; margin-top:4px; }
+  /* VIEWS */
+  .view { display:none; }
+  .view.active { display:block; }
 
-  /* GMAIL CONNECT BANNER */
-  .connect-banner {
-    background:var(--surface); border:1px solid var(--border); border-radius:16px;
-    padding:32px; text-align:center; margin-bottom:28px;
+  /* ===== SETUP VIEW ===== */
+  .setup-page { max-width:480px; margin:0 auto; padding:32px 20px; }
+  .setup-page h1 { font-family:var(--serif); font-size:1.5rem; font-weight:500; margin-bottom:8px; }
+  .setup-page p { color:var(--text-secondary); font-size:0.9rem; margin-bottom:32px; line-height:1.6; }
+
+  .provider-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; }
+  .provider-btn {
+    background:var(--surface); border:2px solid var(--border); border-radius:14px;
+    padding:20px 16px; text-align:center; cursor:pointer; transition:all 0.2s;
   }
-  .connect-banner h2 { font-family:var(--serif); font-size:1.3rem; margin-bottom:8px; }
-  .connect-banner p { color:var(--text-secondary); font-size:0.9rem; margin-bottom:24px; line-height:1.6; }
-  .gmail-btn {
-    display:inline-flex; align-items:center; gap:10px;
-    background:#fff; color:#1a1a1a; border:none; border-radius:10px;
-    padding:13px 24px; font-size:0.92rem; font-weight:600; cursor:pointer;
-    font-family:var(--sans); transition:all 0.2s; box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  .provider-btn:hover, .provider-btn.selected { border-color:var(--coral); background:var(--coral-glow); }
+  .provider-icon { font-size:1.8rem; margin-bottom:8px; }
+  .provider-name { font-size:0.88rem; font-weight:600; color:var(--text); }
+  .provider-desc { font-size:0.75rem; color:var(--muted); margin-top:3px; }
+
+  .setup-form { display:none; }
+  .setup-form.show { display:block; }
+  .form-group { margin-bottom:16px; }
+  label { display:block; font-family:var(--mono); font-size:0.7rem; color:var(--text-secondary); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px; }
+  input, textarea {
+    width:100%; background:var(--surface2); border:1px solid var(--border);
+    border-radius:10px; color:var(--text); font-family:var(--sans);
+    font-size:0.92rem; padding:13px 15px; outline:none; transition:border-color 0.2s;
   }
+  input::placeholder, textarea::placeholder { color:var(--muted); }
+  input:focus, textarea:focus { border-color:var(--coral); box-shadow:0 0 0 3px var(--coral-glow); }
+  textarea { resize:none; min-height:80px; line-height:1.5; font-size:0.85rem; }
+
+  .btn-primary { width:100%; background:var(--coral); color:#1A1210; border:none; border-radius:10px; padding:14px; font-size:0.92rem; font-weight:700; font-family:var(--sans); cursor:pointer; transition:all 0.2s; margin-top:8px; }
+  .btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 4px 16px rgba(255,139,94,0.4); }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+  .gmail-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:#fff; color:#1a1a1a; border:none; border-radius:10px; padding:14px; font-size:0.92rem; font-weight:600; cursor:pointer; font-family:var(--sans); transition:all 0.2s; box-shadow:0 2px 8px rgba(0,0,0,0.3); }
   .gmail-btn:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,0.4); }
-  .gmail-btn img { width:20px; height:20px; }
 
-  .connected-badge {
-    display:inline-flex; align-items:center; gap:8px;
-    background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3);
-    color:var(--success); border-radius:100px; padding:8px 18px;
-    font-size:0.85rem; font-weight:500; margin-bottom:20px;
-  }
-
-  /* INBOX */
-  .inbox-grid { display:grid; grid-template-columns:1fr 1.5fr; gap:20px; }
-  @media(max-width:800px) { .inbox-grid { grid-template-columns:1fr; } }
-
-  .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
-  .card-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-  .card-header h2 { font-size:0.95rem; font-weight:600; color:var(--text); }
-  .card-body { padding:0; }
-
-  /* EMAIL LIST */
-  .email-item {
-    padding:16px 20px; border-bottom:1px solid rgba(58,63,74,0.5);
-    cursor:pointer; transition:background 0.15s;
-  }
-  .email-item:last-child { border-bottom:none; }
-  .email-item:hover { background:rgba(255,255,255,0.03); }
-  .email-item.selected { background:var(--coral-glow); border-left:3px solid var(--coral); }
-  .email-from { font-size:0.85rem; font-weight:600; color:var(--text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .email-subject { font-size:0.82rem; color:var(--text-secondary); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .email-date { font-family:var(--mono); font-size:0.72rem; color:var(--muted); }
-  .email-empty { padding:32px; text-align:center; color:var(--muted); font-size:0.88rem; }
-
-  /* AI REPLY */
-  .reply-panel { padding:20px; }
-  .selected-email { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:16px; font-size:0.85rem; color:var(--text-secondary); line-height:1.6; max-height:200px; overflow-y:auto; }
-  .selected-email strong { color:var(--text); display:block; margin-bottom:6px; }
-
-  label { display:block; font-family:var(--mono); font-size:0.72rem; color:var(--text-secondary); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px; }
-  select { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:var(--sans); font-size:0.88rem; padding:10px 14px; outline:none; appearance:none; cursor:pointer; margin-bottom:14px; transition:border-color 0.2s; }
-  select:focus { border-color:var(--coral); }
-  textarea { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:var(--sans); font-size:0.88rem; padding:14px; outline:none; resize:none; min-height:140px; line-height:1.6; transition:border-color 0.2s; margin-bottom:12px; }
-  textarea::placeholder { color:var(--muted); }
-  textarea:focus { border-color:var(--coral); box-shadow:0 0 0 3px var(--coral-glow); }
-
-  .btn-primary { width:100%; background:var(--coral); color:#1A1210; border:none; border-radius:10px; padding:13px; font-size:0.9rem; font-weight:700; font-family:var(--sans); cursor:pointer; transition:all 0.2s; box-shadow:0 3px 12px rgba(255,139,94,0.3); }
-  .btn-primary:hover:not(:disabled) { transform:translateY(-1px); }
-  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
-
-  .result-box { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px; font-size:0.88rem; line-height:1.75; color:var(--text); margin-top:14px; white-space:pre-wrap; }
-  .copy-btn { background:none; border:1px solid var(--border); color:var(--text-secondary); font-family:var(--mono); font-size:0.72rem; padding:5px 12px; border-radius:6px; cursor:pointer; transition:all 0.2s; }
-  .copy-btn:hover { color:var(--text); border-color:var(--coral); }
-  .send-btn { background:var(--coral); color:#1A1210; border:none; border-radius:6px; padding:6px 16px; font-size:0.82rem; font-weight:700; cursor:pointer; font-family:var(--sans); transition:all 0.2s; }
-  .send-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(255,139,94,0.4); }
-  .send-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-  .result-box[contenteditable="true"] { outline:none; cursor:text; }
-  .result-box[contenteditable="true"]:focus { border-color:var(--coral); box-shadow:0 0 0 3px var(--coral-glow); }
-
-  /* MANUAL MODE */
-  .manual-card { padding:20px; }
-  .divider { display:flex; align-items:center; gap:12px; margin:20px 0; color:var(--muted); font-size:0.8rem; }
+  .divider { display:flex; align-items:center; gap:12px; margin:20px 0; color:var(--muted); font-size:0.78rem; font-family:var(--mono); }
   .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
-  .refresh-btn { background:var(--surface2); border:1px solid var(--border); color:var(--text-secondary); font-size:0.8rem; padding:6px 14px; border-radius:8px; cursor:pointer; font-family:var(--sans); transition:all 0.2s; }
-  .refresh-btn:hover { color:var(--text); }
+  /* ===== INBOX VIEW ===== */
+  .inbox-header { padding:16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--surface); }
+  .inbox-header h2 { font-size:1rem; font-weight:700; }
+  .inbox-meta { font-family:var(--mono); font-size:0.72rem; color:var(--coral-soft); }
+  .refresh-btn { background:none; border:1px solid var(--border); color:var(--text-secondary); font-size:0.8rem; padding:6px 14px; border-radius:8px; cursor:pointer; font-family:var(--sans); }
+  .refresh-btn:hover { color:var(--text); border-color:var(--coral); }
+
+  .inbox-tabs { display:flex; background:var(--surface); border-bottom:1px solid var(--border); }
+  .inbox-tab { flex:1; text-align:center; padding:12px; font-size:0.85rem; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; }
+  .inbox-tab.active { color:var(--coral); border-bottom-color:var(--coral); }
+
+  .email-list { }
+  .email-item {
+    padding:16px; border-bottom:1px solid rgba(58,63,74,0.4);
+    cursor:pointer; transition:background 0.15s; display:flex; gap:12px; align-items:flex-start;
+  }
+  .email-item:active { background:var(--surface2); }
+  .email-item.unread { background:rgba(255,139,94,0.04); }
+  .email-avatar { width:40px; height:40px; border-radius:50%; background:var(--coral); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; color:#1A1210; flex-shrink:0; }
+  .email-content { flex:1; min-width:0; }
+  .email-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px; }
+  .email-from { font-size:0.88rem; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
+  .email-date { font-family:var(--mono); font-size:0.72rem; color:var(--muted); white-space:nowrap; flex-shrink:0; }
+  .email-subject { font-size:0.83rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px; }
+  .email-preview { font-size:0.78rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .unread-dot { width:8px; height:8px; border-radius:50%; background:var(--coral); flex-shrink:0; margin-top:16px; }
+  .email-empty { padding:48px 20px; text-align:center; color:var(--muted); }
+  .email-empty-icon { font-size:2.5rem; margin-bottom:12px; }
+
+  /* ===== MAIL DETAIL VIEW ===== */
+  .detail-header { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; background:var(--surface); position:sticky; top:56px; z-index:50; }
+  .back-btn { background:none; border:none; color:var(--text); font-size:1.2rem; cursor:pointer; padding:4px; }
+  .detail-subject { font-size:0.95rem; font-weight:700; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .detail-actions { display:flex; gap:8px; }
+  .icon-btn { background:none; border:none; color:var(--text-secondary); font-size:1.1rem; cursor:pointer; padding:6px; border-radius:8px; transition:all 0.2s; }
+  .icon-btn:hover { color:var(--text); background:var(--surface2); }
+
+  .detail-body { padding:16px; }
+  .sender-row { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+  .sender-avatar { width:44px; height:44px; border-radius:50%; background:var(--coral); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem; color:#1A1210; flex-shrink:0; }
+  .sender-info { flex:1; }
+  .sender-name { font-size:0.92rem; font-weight:700; color:var(--text); }
+  .sender-email { font-size:0.78rem; color:var(--muted); font-family:var(--mono); }
+  .sender-date { font-size:0.78rem; color:var(--muted); font-family:var(--mono); }
+  .mail-body { font-size:0.9rem; line-height:1.75; color:var(--text-secondary); white-space:pre-wrap; word-break:break-word; background:var(--surface); border-radius:12px; padding:16px; margin-bottom:20px; }
+
+  /* AI REPLY SECTION */
+  .ai-section { background:var(--surface); border-radius:16px; padding:16px; margin-bottom:80px; }
+  .ai-section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .ai-label { font-family:var(--mono); font-size:0.72rem; color:var(--coral-soft); letter-spacing:0.06em; text-transform:uppercase; }
+  .tone-select { background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:var(--sans); font-size:0.8rem; padding:6px 12px; outline:none; cursor:pointer; }
+  .ai-reply-box { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:14px; font-size:0.88rem; line-height:1.7; color:var(--text); min-height:120px; outline:none; margin-bottom:12px; white-space:pre-wrap; }
+  .ai-reply-box:focus { border-color:var(--coral); }
+  .ai-reply-placeholder { color:var(--muted); font-style:italic; }
+  .ai-actions { display:flex; gap:10px; }
+  .btn-gen { flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:10px; padding:12px; font-size:0.88rem; font-weight:600; cursor:pointer; font-family:var(--sans); transition:all 0.2s; }
+  .btn-gen:hover { border-color:var(--coral); color:var(--coral); }
+  .btn-send { flex:2; background:var(--coral); color:#1A1210; border:none; border-radius:10px; padding:12px; font-size:0.88rem; font-weight:700; cursor:pointer; font-family:var(--sans); transition:all 0.2s; }
+  .btn-send:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(255,139,94,0.4); }
+  .btn-send:disabled, .btn-gen:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+  /* STATUS */
+  .status-msg { font-size:0.82rem; text-align:center; margin-top:10px; padding:8px; border-radius:8px; display:none; }
+  .status-msg.success { background:rgba(74,222,128,0.1); color:var(--success); display:block; }
+  .status-msg.error { background:rgba(248,113,113,0.1); color:var(--danger); display:block; }
+
+  /* CONNECTED BAR */
+  .connected-bar { background:rgba(74,222,128,0.08); border-bottom:1px solid rgba(74,222,128,0.2); padding:8px 16px; display:flex; align-items:center; justify-content:space-between; }
+  .connected-info { display:flex; align-items:center; gap:8px; font-size:0.82rem; color:var(--success); }
+  .disconnect-btn { font-size:0.75rem; color:var(--muted); background:none; border:none; cursor:pointer; font-family:var(--sans); }
+
+  /* LOADING */
+  .loading-spinner { display:flex; align-items:center; justify-content:center; padding:48px; }
+  .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--coral); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* SETTINGS FAB */
+  .settings-fab { position:fixed; bottom:24px; right:20px; background:var(--surface); border:1px solid var(--border); border-radius:100px; padding:10px 18px; font-size:0.82rem; color:var(--text-secondary); cursor:pointer; font-family:var(--sans); box-shadow:0 4px 16px rgba(0,0,0,0.4); display:none; }
+  .settings-fab:hover { color:var(--text); border-color:var(--coral); }
 </style>
 </head>
 <body>
 
-<nav>
+<!-- TOP NAV -->
+<div class="topnav">
+  <a href="dashboard.html" class="nav-back">← Dashboard</a>
   <div class="brand">on<em>brain</em></div>
-  <div class="nav-links">
-    <a href="dashboard.html" class="nav-link">← Dashboard</a>
-    <a href="mail.html" class="nav-link active">✉️ AI-mail</a>
-  </div>
-</nav>
+  <div style="width:80px"></div>
+</div>
 
-<div class="page">
-  <div class="page-header">
-    <h1>✉️ AI-mailassistent</h1>
-    <p>Anslut er Gmail — AI läser inkorgen och skriver svarsutkast åt er</p>
-  </div>
+<!-- VIEW 1: SETUP -->
+<div class="view active" id="view-setup">
+  <div class="setup-page">
+    <h1>✉️ Anslut er mail</h1>
+    <p>Välj hur ni vill ansluta. Kopplingen sparas permanent — ni behöver aldrig logga in igen.</p>
 
-  <!-- GMAIL CONNECT -->
-  <div id="connect-section">
-    <div class="connect-banner">
-      <h2>Anslut er Gmail-inkorg</h2>
-      <p>Klicka nedan för att ansluta er Gmail. OnBrain läser inkorgen och hjälper er skriva professionella svar på sekunder.</p>
+    <div class="provider-grid">
+      <div class="provider-btn" onclick="selectProvider('gmail')" id="provider-gmail">
+        <div class="provider-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.27 9.18v5.59l-3.1 2.42V6.81z"/><path fill="#FBBC05" d="M19.16 9.18l3.1-2.37v10.38l-3.1-2.42z"/><path fill="#34A853" d="M5.27 14.77l6.73 5.23 6.73-5.23 3.1 2.42L12 22.14 1.9 17.19z"/><path fill="#EA4335" d="M1.9 6.81L5 9.18l7-5.45 7 5.45 3.1-2.37L12 1.86z"/><path fill="#4285F4" d="M12 3.73L5.27 9.18v5.59L12 20l6.73-5.23V9.18z"/></svg>
+        </div>
+        <div class="provider-name">Gmail</div>
+        <div class="provider-desc">Google-inloggning</div>
+      </div>
+      <div class="provider-btn" onclick="selectProvider('imap')" id="provider-imap">
+        <div class="provider-icon">📧</div>
+        <div class="provider-name">One.com / Annat</div>
+        <div class="provider-desc">Outlook, One.com m.fl.</div>
+      </div>
+    </div>
+
+    <!-- GMAIL SETUP -->
+    <div class="setup-form" id="form-gmail">
+      <div class="form-group">
+        <label>Er signatur (valfritt)</label>
+        <textarea id="gmail-sig" placeholder="Med vänliga hälsningar,&#10;Namn&#10;Företaget AB&#10;070-123 45 67"></textarea>
+      </div>
       <button class="gmail-btn" onclick="connectGmail()">
         <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.27 9.18v5.59l-3.1 2.42V6.81z"/><path fill="#FBBC05" d="M19.16 9.18l3.1-2.37v10.38l-3.1-2.42z"/><path fill="#34A853" d="M5.27 14.77l6.73 5.23 6.73-5.23 3.1 2.42L12 22.14 1.9 17.19z"/><path fill="#EA4335" d="M1.9 6.81L5 9.18l7-5.45 7 5.45 3.1-2.37L12 1.86z"/><path fill="#4285F4" d="M12 3.73L5.27 9.18v5.59L12 20l6.73-5.23V9.18z"/></svg>
-        Anslut Gmail
+        Anslut med Google
       </button>
     </div>
-  </div>
 
-  <!-- CONNECTED STATE -->
-  <div id="inbox-section" style="display:none">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
-      <div class="connected-badge">
-        ✓ Gmail ansluten: <span id="gmail-email"></span>
+    <!-- IMAP SETUP -->
+    <div class="setup-form" id="form-imap">
+      <div class="form-group">
+        <label>E-postadress</label>
+        <input type="email" id="imap-email" placeholder="info@foretaget.se" />
       </div>
-      <button class="refresh-btn" onclick="loadEmails()">↻ Uppdatera</button>
-    </div>
-
-    <div class="inbox-grid">
-      <div class="card">
-        <div class="card-header">
-          <h2>📬 Olästa mail</h2>
-        </div>
-        <div class="card-body" id="email-list">
-          <div class="email-empty">Laddar mail...</div>
-        </div>
+      <div class="form-group">
+        <label>Lösenord</label>
+        <input type="password" id="imap-password" placeholder="Ert lösenord" />
       </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h2>✍️ AI-svarsutkast</h2>
-        </div>
-        <div class="reply-panel">
-          <div id="no-selected" style="color:var(--muted); font-size:0.88rem; padding:20px 0;">
-            ← Välj ett mail för att generera ett svar
-          </div>
-          <div id="reply-form" style="display:none">
-            <div class="selected-email" id="selected-email-content"></div>
-            <label>Ton på svaret</label>
-            <select id="tone">
-              <option value="professionell">Professionell</option>
-              <option value="vänlig">Vänlig & personlig</option>
-              <option value="kort">Kort & koncis</option>
-              <option value="säljande">Säljande</option>
-            </select>
-            <button class="btn-primary" id="gen-btn" onclick="generateReply()">⚡ Generera svar</button>
-            <div id="reply-result" style="display:none">
-              <div class="result-box" id="reply-content" contenteditable="true"></div>
-              <div style="display:flex; gap:10px; margin-top:10px;">
-                <button class="copy-btn" onclick="copyReply()">Kopiera</button>
-                <button class="send-btn" id="send-btn" onclick="sendReply()">📤 Skicka från Gmail</button>
-              </div>
-              <div id="send-status" style="display:none; margin-top:8px; font-size:0.82rem;"></div>
-            </div>
-          </div>
-        </div>
+      <div class="form-group">
+        <label>Er signatur</label>
+        <textarea id="imap-sig" placeholder="Med vänliga hälsningar,&#10;Namn&#10;Företaget AB&#10;070-123 45 67"></textarea>
       </div>
-    </div>
-
-    <div class="divider">ELLER KLISTRA IN MANUELLT</div>
-
-    <div class="card">
-      <div class="card-header"><h2>📋 Manuell inmatning</h2></div>
-      <div class="manual-card">
-        <label>Klistra in ett mail</label>
-        <textarea id="manual-mail" placeholder="Klistra in ett inkommet mail här..."></textarea>
-        <label>Ton</label>
-        <select id="manual-tone">
-          <option value="professionell">Professionell</option>
-          <option value="vänlig">Vänlig & personlig</option>
-          <option value="kort">Kort & koncis</option>
-        </select>
-        <button class="btn-primary" id="manual-btn" onclick="generateManualReply()">⚡ Generera svar</button>
-        <div id="manual-result" style="display:none">
-          <div class="result-box" id="manual-content"></div>
-          <button class="copy-btn" onclick="copyManual()">Kopiera svar</button>
-        </div>
+      <div style="background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.25); border-radius:10px; padding:12px; margin-bottom:16px; font-size:0.82rem; color:var(--warning);">
+        ⚠️ One.com: aktivera IMAP under Inställningar → E-post i One.com kontrollpanel
       </div>
+      <button class="btn-primary" id="imap-connect-btn" onclick="connectImap()">Anslut mailkonto</button>
     </div>
   </div>
+</div>
 
-  <!-- MANUAL ONLY (ej ansluten) -->
-  <div id="manual-section">
-    <div class="card">
-      <div class="card-header"><h2>📋 Klistra in ett mail manuellt</h2></div>
-      <div class="manual-card">
-        <label>Inkommet mail</label>
-        <textarea id="manual-mail2" placeholder="Klistra in ett inkommet mail här..."></textarea>
-        <label>Ton</label>
-        <select id="manual-tone2">
-          <option value="professionell">Professionell</option>
-          <option value="vänlig">Vänlig & personlig</option>
-          <option value="kort">Kort & koncis</option>
-        </select>
-        <button class="btn-primary" id="manual-btn2" onclick="generateManualReply2()">⚡ Generera svar</button>
-        <div id="manual-result2" style="display:none">
-          <div class="result-box" id="manual-content2"></div>
-          <button class="copy-btn" onclick="copyManual2()">Kopiera svar</button>
-        </div>
+<!-- VIEW 2: INBOX -->
+<div class="view" id="view-inbox">
+  <div class="connected-bar">
+    <div class="connected-info">
+      <span>✓</span>
+      <span id="connected-email"></span>
+    </div>
+    <button class="disconnect-btn" onclick="disconnect()">Byt konto</button>
+  </div>
+  <div class="inbox-header">
+    <div>
+      <h2>📬 Inkorg</h2>
+      <div class="inbox-meta" id="inbox-meta"></div>
+    </div>
+    <button class="refresh-btn" onclick="loadEmails()">↻ Uppdatera</button>
+  </div>
+  <div class="inbox-tabs">
+    <div class="inbox-tab active" onclick="filterEmails('all')" id="tab-all">Alla</div>
+    <div class="inbox-tab" onclick="filterEmails('unread')" id="tab-unread">Olästa</div>
+  </div>
+  <div id="email-list-container">
+    <div class="loading-spinner"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<!-- VIEW 3: MAIL DETAIL -->
+<div class="view" id="view-detail">
+  <div class="detail-header">
+    <button class="back-btn" onclick="showInbox()">←</button>
+    <div class="detail-subject" id="detail-subject"></div>
+  </div>
+  <div class="detail-body">
+    <div class="sender-row">
+      <div class="sender-avatar" id="detail-avatar"></div>
+      <div class="sender-info">
+        <div class="sender-name" id="detail-from-name"></div>
+        <div class="sender-email" id="detail-from-email"></div>
+        <div class="sender-date" id="detail-date"></div>
       </div>
+    </div>
+    <div class="mail-body" id="detail-body"></div>
+
+    <div class="ai-section">
+      <div class="ai-section-header">
+        <div class="ai-label">⚡ AI-svarsutkast</div>
+        <select class="tone-select" id="detail-tone">
+          <option value="professionell">Professionell</option>
+          <option value="vänlig">Vänlig</option>
+          <option value="kort">Kort</option>
+          <option value="säljande">Säljande</option>
+        </select>
+      </div>
+      <div class="ai-reply-box" id="ai-reply" contenteditable="true">
+        <span class="ai-reply-placeholder">Klicka "Generera" för att skriva ett AI-svar...</span>
+      </div>
+      <div class="ai-actions">
+        <button class="btn-gen" id="gen-btn" onclick="generateReply()">✨ Generera</button>
+        <button class="btn-send" id="send-btn" onclick="sendReply()">📤 Skicka svar</button>
+      </div>
+      <div class="status-msg" id="status-msg"></div>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth-guard.js"></script>
 <script>
-const _sbMail = window.supabase.createClient(
+const _sb = window.supabase.createClient(
   "https://nbtvsojkkrfamvfnddoc.supabase.co",
   "sb_publishable_0BxO282ZNBxUD1bf-UTaUg_jRqKAswX"
 );
 
 let currentUserId = null;
+let currentUserEmail = null;
+let mailConnection = null;
+let allEmails = [];
 let selectedEmail = null;
+let userSignature = '';
+let currentFilter = 'all';
 
-// Kolla URL-parametrar
-const params = new URLSearchParams(window.location.search);
-if (params.get('gmail') === 'connected') {
-  const email = params.get('email');
-  showConnected(email);
-  window.history.replaceState({}, '', 'mail.html');
-}
-if (params.get('error')) {
-  alert('Fel vid Gmail-anslutning: ' + params.get('error'));
-}
-
-async function init() {
-  await new Promise(r => setTimeout(r, 600));
-  const { data: { session } } = await _sbMail.auth.getSession();
-  if (!session) return;
+// Init
+(async () => {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
   currentUserId = session.user.id;
+  currentUserEmail = session.user.email;
 
-  // Kolla om Gmail redan är anslutet
+  // Kolla om gmail=connected i URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('gmail') === 'connected') {
+    const email = params.get('email') || '';
+    window.history.replaceState({}, '', 'mail.html');
+    // Spara signatur om angiven
+    const sig = localStorage.getItem('pending_gmail_sig') || '';
+    localStorage.removeItem('pending_gmail_sig');
+    await saveConnection('gmail', email, sig);
+    mailConnection = { provider: 'gmail', email };
+    showConnectedInbox(email);
+    return;
+  }
+
+  // Kolla om koppling redan finns
+  await checkExistingConnection();
+})();
+
+async function checkExistingConnection() {
   try {
-    const res = await fetch('/api/gmail-fetch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: currentUserId, maxResults: 1 })
+    const res = await fetch(`${_sb.supabaseUrl}/rest/v1/mail_connections?user_id=eq.${currentUserId}&select=*`, {
+      headers: {
+        'apikey': "sb_publishable_0BxO282ZNBxUD1bf-UTaUg_jRqKAswX",
+        'Authorization': `Bearer ${(await _sb.auth.getSession()).data.session?.access_token}`
+      }
     });
-    const data = await res.json();
-    if (data.gmailEmail) {
-      showConnected(data.gmailEmail);
+    const conns = await res.json();
+    if (conns.length > 0) {
+      mailConnection = conns[0];
+      userSignature = conns[0].signature || '';
+      showConnectedInbox(conns[0].email);
+    } else {
+      showView('setup');
     }
-  } catch(e) {}
+  } catch(e) {
+    showView('setup');
+  }
 }
 
-function connectGmail() {
-  if (!currentUserId) { alert('Logga in först!'); return; }
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+}
+
+function selectProvider(type) {
+  document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('provider-' + type).classList.add('selected');
+  document.querySelectorAll('.setup-form').forEach(f => f.classList.remove('show'));
+  document.getElementById('form-' + type).classList.add('show');
+}
+
+async function connectGmail() {
+  const sig = document.getElementById('gmail-sig').value.trim();
+  localStorage.setItem('pending_gmail_sig', sig);
   window.location.href = `/api/gmail-auth?userId=${currentUserId}`;
 }
 
-function showConnected(email) {
-  document.getElementById('connect-section').style.display = 'none';
-  document.getElementById('manual-section').style.display = 'none';
-  document.getElementById('inbox-section').style.display = 'block';
-  document.getElementById('gmail-email').textContent = email;
+async function connectImap() {
+  const email = document.getElementById('imap-email').value.trim();
+  const password = document.getElementById('imap-password').value;
+  const sig = document.getElementById('imap-sig').value.trim();
+
+  if (!email || !password) { alert('Fyll i e-post och lösenord!'); return; }
+
+  const btn = document.getElementById('imap-connect-btn');
+  btn.disabled = true; btn.textContent = 'Ansluter...';
+
+  await saveConnection('imap', email, sig);
+  mailConnection = { provider: 'imap', email, signature: sig };
+  userSignature = sig;
+  showConnectedInbox(email);
+  btn.disabled = false; btn.textContent = 'Anslut mailkonto';
+}
+
+async function saveConnection(provider, email, signature) {
+  await fetch('/api/save-connection', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: currentUserId, provider, email, signature })
+  });
+}
+
+function showConnectedInbox(email) {
+  document.getElementById('connected-email').textContent = email;
+  showView('inbox');
   loadEmails();
 }
 
 async function loadEmails() {
-  if (!currentUserId) return;
-  document.getElementById('email-list').innerHTML = '<div class="email-empty">Hämtar mail...</div>';
+  document.getElementById('email-list-container').innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
   try {
-    const res = await fetch('/api/gmail-fetch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: currentUserId, maxResults: 10 })
-    });
-    const data = await res.json();
-    if (!data.emails || data.emails.length === 0) {
-      document.getElementById('email-list').innerHTML = '<div class="email-empty">Inga olästa mail 🎉</div>';
-      return;
+    // Använd Gmail API om Gmail-koppling
+    if (mailConnection?.provider === 'gmail') {
+      const res = await fetch('/api/gmail-fetch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUserId, maxResults: 20 })
+      });
+      const data = await res.json();
+      if (data.emails) {
+        allEmails = data.emails.map(e => ({ ...e, unread: true }));
+        renderEmails();
+        return;
+      }
     }
-    document.getElementById('email-list').innerHTML = data.emails.map((email, i) => `
-      <div class="email-item" onclick="selectEmail(${i})" id="email-${i}">
-        <div class="email-from">${email.from.split('<')[0].trim()}</div>
-        <div class="email-subject">${email.subject}</div>
-        <div class="email-date">${new Date(email.date).toLocaleDateString('sv-SE')}</div>
-      </div>
-    `).join('');
-    window._emails = data.emails;
+
+    // Fallback: visa manuell inkorg
+    allEmails = [];
+    renderEmails();
   } catch(e) {
-    document.getElementById('email-list').innerHTML = `<div class="email-empty">Fel: ${e.message}</div>`;
+    document.getElementById('email-list-container').innerHTML = `<div class="email-empty"><div class="email-empty-icon">⚠️</div><div>${e.message}</div></div>`;
   }
 }
 
-function selectEmail(index) {
-  selectedEmail = window._emails[index];
-  document.querySelectorAll('.email-item').forEach(el => el.classList.remove('selected'));
-  document.getElementById('email-' + index)?.classList.add('selected');
-  document.getElementById('no-selected').style.display = 'none';
-  document.getElementById('reply-form').style.display = 'block';
-  document.getElementById('reply-result').style.display = 'none';
-  document.getElementById('selected-email-content').innerHTML = `
-    <strong>Från: ${selectedEmail.from}</strong>
-    <strong>Ämne: ${selectedEmail.subject}</strong>
-    ${selectedEmail.body}
-  `;
+function renderEmails() {
+  const filtered = currentFilter === 'unread' ? allEmails.filter(e => e.unread) : allEmails;
+  const unreadCount = allEmails.filter(e => e.unread).length;
+  document.getElementById('inbox-meta').textContent = `${unreadCount} olästa`;
+  document.getElementById('tab-unread').textContent = `Olästa (${unreadCount})`;
+
+  if (filtered.length === 0) {
+    document.getElementById('email-list-container').innerHTML = `
+      <div class="email-empty">
+        <div class="email-empty-icon">🎉</div>
+        <div>${currentFilter === 'unread' ? 'Inga olästa mail!' : 'Inga mail att visa'}</div>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('email-list-container').innerHTML = filtered.map((email, i) => {
+    const name = email.from?.split('<')[0].trim() || email.from || '?';
+    const initial = name.charAt(0).toUpperCase();
+    const emailAddr = (email.from?.match(/<(.+)>/) || [])[1] || email.from || '';
+    const preview = email.body?.slice(0, 80) || '';
+    const dateStr = email.date ? new Date(email.date).toLocaleDateString('sv-SE', { day:'numeric', month:'short' }) : '';
+
+    return `
+      <div class="email-item ${email.unread ? 'unread' : ''}" onclick="openEmail(${i})">
+        <div class="email-avatar">${initial}</div>
+        <div class="email-content">
+          <div class="email-top">
+            <div class="email-from">${name}</div>
+            <div class="email-date">${dateStr}</div>
+          </div>
+          <div class="email-subject">${email.subject || '(Inget ämne)'}</div>
+          <div class="email-preview">${preview}</div>
+        </div>
+        ${email.unread ? '<div class="unread-dot"></div>' : ''}
+      </div>`;
+  }).join('');
+}
+
+function filterEmails(type) {
+  currentFilter = type;
+  document.querySelectorAll('.inbox-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + type).classList.add('active');
+  renderEmails();
+}
+
+function openEmail(index) {
+  selectedEmail = allEmails[index];
+  allEmails[index].unread = false;
+
+  const name = selectedEmail.from?.split('<')[0].trim() || '?';
+  const emailAddr = (selectedEmail.from?.match(/<(.+)>/) || [])[1] || selectedEmail.from || '';
+  const initial = name.charAt(0).toUpperCase();
+
+  document.getElementById('detail-subject').textContent = selectedEmail.subject || '(Inget ämne)';
+  document.getElementById('detail-avatar').textContent = initial;
+  document.getElementById('detail-from-name').textContent = name;
+  document.getElementById('detail-from-email').textContent = emailAddr;
+  document.getElementById('detail-date').textContent = selectedEmail.date ? new Date(selectedEmail.date).toLocaleString('sv-SE') : '';
+  document.getElementById('detail-body').textContent = selectedEmail.body || '';
+
+  // Rensa AI-svar
+  document.getElementById('ai-reply').innerHTML = '<span class="ai-reply-placeholder">Klicka "Generera" för att skriva ett AI-svar...</span>';
+  document.getElementById('status-msg').className = 'status-msg';
+
+  showView('detail');
+}
+
+function showInbox() {
+  renderEmails();
+  showView('inbox');
 }
 
 async function generateReply() {
   if (!selectedEmail) return;
-  const tone = document.getElementById('tone').value;
+  const tone = document.getElementById('detail-tone').value;
   const btn = document.getElementById('gen-btn');
   btn.disabled = true; btn.textContent = 'Genererar...';
 
-  const prompt = `Du är en professionell assistent för ett hantverksföretag.
-Mail från: ${selectedEmail.from}
+  const sigText = userSignature ? `\n\n${userSignature}` : '\n\nMed vänliga hälsningar,\n[Namn]\n[Företag]';
+
+  const prompt = `Du är en professionell assistent för ett hantverksföretag i Sverige.
+
+Inkommet mail:
+Från: ${selectedEmail.from}
 Ämne: ${selectedEmail.subject}
 Innehåll: ${selectedEmail.body}
 
-Skriv ett ${tone} svar på svenska. Redo att skicka direkt utan redigering.`;
+Skriv ett ${tone} svar på svenska. 
+VIKTIGT: 
+- Inga markdown-tecken som ** eller *
+- Avsluta ALLTID med denna exakta signatur (ersätt ingenting):${sigText}
+- Svaret ska vara klart att skicka direkt`;
 
   try {
     const res = await fetch('/api/analyze', {
@@ -346,105 +511,70 @@ Skriv ett ${tone} svar på svenska. Redo att skicka direkt utan redigering.`;
       body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await res.json();
-    document.getElementById('reply-content').textContent = data.content?.[0]?.text || '';
-    document.getElementById('reply-result').style.display = 'block';
+    const reply = document.getElementById('ai-reply');
+    reply.textContent = data.content?.[0]?.text || '';
+    reply.focus();
   } catch(e) {
     alert('Fel: ' + e.message);
   } finally {
-    btn.disabled = false; btn.textContent = '⚡ Generera svar';
+    btn.disabled = false; btn.textContent = '✨ Generera';
   }
 }
-
-async function generateManualReply() {
-  const mail = document.getElementById('manual-mail').value.trim();
-  const tone = document.getElementById('manual-tone').value;
-  if (!mail) { alert('Klistra in ett mail!'); return; }
-  const btn = document.getElementById('manual-btn');
-  btn.disabled = true; btn.textContent = 'Genererar...';
-  try {
-    const res = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 800, messages: [{ role: 'user', content: `Du är en professionell assistent för ett hantverksföretag. Skriv ett ${tone} svar på svenska till detta mail:\n\n${mail}` }] })
-    });
-    const data = await res.json();
-    document.getElementById('manual-content').textContent = data.content?.[0]?.text || '';
-    document.getElementById('manual-result').style.display = 'block';
-  } catch(e) { alert('Fel: ' + e.message); }
-  finally { btn.disabled = false; btn.textContent = '⚡ Generera svar'; }
-}
-
-async function generateManualReply2() {
-  const mail = document.getElementById('manual-mail2').value.trim();
-  const tone = document.getElementById('manual-tone2').value;
-  if (!mail) { alert('Klistra in ett mail!'); return; }
-  const btn = document.getElementById('manual-btn2');
-  btn.disabled = true; btn.textContent = 'Genererar...';
-  try {
-    const res = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 800, messages: [{ role: 'user', content: `Du är en professionell assistent för ett hantverksföretag. Skriv ett ${tone} svar på svenska till detta mail:\n\n${mail}` }] })
-    });
-    const data = await res.json();
-    document.getElementById('manual-content2').textContent = data.content?.[0]?.text || '';
-    document.getElementById('manual-result2').style.display = 'block';
-  } catch(e) { alert('Fel: ' + e.message); }
-  finally { btn.disabled = false; btn.textContent = '⚡ Generera svar'; }
-}
-
-function copyReply() { navigator.clipboard.writeText(document.getElementById('reply-content').textContent).then(() => { const b = document.querySelectorAll('.copy-btn')[0]; b.textContent = '✓ Kopierat!'; setTimeout(() => b.textContent = 'Kopiera', 2000); }); }
 
 async function sendReply() {
-  if (!selectedEmail || !currentUserId) return;
-  const message = document.getElementById('reply-content').textContent.trim();
-  if (!message) { alert('Inget svar att skicka!'); return; }
+  if (!selectedEmail) return;
+  const message = document.getElementById('ai-reply').textContent.trim();
+  if (!message || message.includes('Klicka "Generera"')) { alert('Generera ett svar först!'); return; }
 
   const btn = document.getElementById('send-btn');
-  const status = document.getElementById('send-status');
+  const status = document.getElementById('status-msg');
   btn.disabled = true; btn.textContent = 'Skickar...';
+  status.className = 'status-msg';
 
   try {
-    const res = await fetch('/api/gmail-send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: currentUserId,
-        to: selectedEmail.from,
-        subject: selectedEmail.subject,
-        message: message,
-        threadId: selectedEmail.threadId,
-        messageId: selectedEmail.messageId
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      status.style.display = 'block';
-      status.style.color = 'var(--success)';
-      status.textContent = '✅ Svaret skickades från din Gmail!';
-      btn.textContent = '✓ Skickat!';
-      setTimeout(() => {
-        btn.disabled = false;
-        btn.textContent = '📤 Skicka från Gmail';
-        status.style.display = 'none';
-      }, 3000);
+    if (mailConnection?.provider === 'gmail') {
+      const res = await fetch('/api/gmail-send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUserId,
+          to: selectedEmail.from,
+          subject: selectedEmail.subject,
+          message,
+          threadId: selectedEmail.threadId,
+          messageId: selectedEmail.messageId
+        })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
     } else {
-      throw new Error(data.error || 'Kunde inte skicka');
+      // IMAP/SMTP — visa kopia för manuell sändning tills vi bygger SMTP
+      await navigator.clipboard.writeText(message);
+      status.textContent = '📋 Svaret är kopierat! Klistra in det i ert mailprogram.';
+      status.className = 'status-msg success';
+      btn.disabled = false; btn.textContent = '📤 Skicka svar';
+      return;
     }
+
+    status.textContent = '✅ Svaret skickades!';
+    status.className = 'status-msg success';
+    btn.textContent = '✓ Skickat!';
+    setTimeout(() => {
+      btn.disabled = false; btn.textContent = '📤 Skicka svar';
+      showInbox();
+    }, 2000);
   } catch(err) {
-    status.style.display = 'block';
-    status.style.color = 'var(--danger)';
     status.textContent = '⚠️ Fel: ' + err.message;
-    btn.disabled = false;
-    btn.textContent = '📤 Skicka från Gmail';
+    status.className = 'status-msg error';
+    btn.disabled = false; btn.textContent = '📤 Skicka svar';
   }
 }
-function copyManual() { navigator.clipboard.writeText(document.getElementById('manual-content').textContent).then(() => { const b = document.querySelectorAll('.copy-btn')[1]; b.textContent = '✓ Kopierat!'; setTimeout(() => b.textContent = 'Kopiera svar', 2000); }); }
-function copyManual2() { navigator.clipboard.writeText(document.getElementById('manual-content2').textContent).then(() => { const b = document.querySelector('.copy-btn'); b.textContent = '✓ Kopierat!'; setTimeout(() => b.textContent = 'Kopiera svar', 2000); }); }
 
-init();
+function disconnect() {
+  if (!confirm('Koppla bort mailkontot?')) return;
+  mailConnection = null;
+  showView('setup');
+}
 </script>
 </body>
 </html>
